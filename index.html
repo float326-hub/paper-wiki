@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paper Wiki</title><!-- local -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1014; --surface:#161920; --surface2:#1d212a; --surface3:#252a35;
+  --border:#2a303c; --text:#e7e9ee; --muted:#9199a8; --faint:#646c7b;
+  --accent:#8ea8ff; --accent-weak:rgba(142,168,255,.14);
+  --s-plan:#8b95a7; --s-read:#f2b552; --s-done:#5fd394; --s-cancel:#e0707a;
+  --radius:12px; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',system-ui,sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:0;z-index:20;background:rgba(14,16,20,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.top-in{max-width:1280px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px;margin-right:6px;cursor:pointer;user-select:none}
+.brand .logo{width:22px;height:22px;flex:0 0 auto}
+.brand .bt{font-family:'Noto Serif KR',serif;font-size:16px;font-weight:600;letter-spacing:-.01em;color:var(--text)}
+.tabs{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:3px}
+.tabs button{border:0;background:transparent;color:var(--muted);padding:6px 12px;border-radius:7px;font-size:13px;font-weight:500}
+.tabs button.on{background:var(--surface3);color:var(--text)}
+.tabs button:hover:not(.on){color:var(--text)}
+.spacer{flex:1}
+.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:7px 12px;border-radius:9px;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d12}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--s-cancel)}
+.btn.on{border-color:var(--accent);color:var(--accent);background:var(--accent-weak)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.menu-wrap{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 6px);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:5px;min-width:210px;box-shadow:0 12px 32px rgba(0,0,0,.45);display:none;z-index:30}
+.menu.open{display:block}
+.menu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:8px 10px;border-radius:7px;font-size:13px}
+.menu button:hover{background:var(--surface3)}
+.menu .sep{height:1px;background:var(--border);margin:4px 2px}
+.menu small{display:block;color:var(--faint);font-size:11.5px}
+
+/* ---------- filter bar ---------- */
+main{max-width:1280px;margin:0 auto;padding:20px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.search{flex:1 1 260px;position:relative}
+.search input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 12px 8px 34px;outline:none}
+.search input:focus{border-color:var(--accent)}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.5}
+select.f{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 10px;outline:none;max-width:180px}
+.selbar{display:flex;align-items:center;gap:10px;background:var(--accent-weak);border:1px solid rgba(142,168,255,.35);border-radius:10px;padding:8px 12px;margin-bottom:14px;font-size:13px}
+.count-note{color:var(--muted);font-size:12.5px;margin-bottom:10px}
+
+/* ---------- chips ---------- */
+.tag{display:inline-flex;align-items:center;font-size:11.5px;font-weight:500;padding:2px 8px;border-radius:999px;border:1px solid;white-space:nowrap}
+.kw{display:inline-block;font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--surface2);padding:1px 6px;border-radius:5px}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;white-space:nowrap}
+.status::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.st-plan{color:var(--s-plan)} .st-read{color:var(--s-read)} .st-done{color:var(--s-done)} .st-cancel{color:var(--s-cancel)}
+.stars{color:#f5c451;letter-spacing:1px;font-size:12.5px;white-space:nowrap}
+.stars .off{color:var(--surface3)}
+.rel{font-size:11.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.rel.none{color:var(--faint)}
+.rel.hub{color:#f5c451;font-weight:600}
+.card.hubc{border-color:rgba(245,196,81,.35)}
+
+/* ---------- home ---------- */
+.hero{margin:10px 0 22px;padding:4px 2px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.hero h1{margin:0;font-family:'Noto Serif KR',serif;font-size:30px;font-weight:600;letter-spacing:-.02em;line-height:1.25}
+.hero p{margin:6px 0 0;color:var(--muted);font-size:13.5px}
+.hero .meta{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums;text-align:right;line-height:1.7}
+.hero .meta b{color:var(--muted);font-weight:500}
+.tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:border-color .15s}
+.tile:hover{border-color:var(--faint)}
+.tile .n{font-size:26px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.tile .l{font-size:12.5px;color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px}
+.panel h2{font-size:14px;margin:0 0 4px;font-weight:700}
+.panel .sub{color:var(--muted);font-size:12.5px;margin:0 0 16px}
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar{display:grid;grid-template-columns:150px 1fr 70px;align-items:center;gap:12px;cursor:pointer;border-radius:8px;padding:2px 4px;margin:0 -4px}
+.bar:hover{background:var(--surface2)}
+.bar .name{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .track{height:22px;background:var(--surface2);border-radius:6px;overflow:hidden;display:flex}
+.bar .seg{height:100%}
+.bar .num{font-variant-numeric:tabular-nums;font-size:13px;text-align:right;color:var(--muted)}
+.bar .num b{color:var(--text)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.empty{text-align:center;padding:56px 20px;color:var(--muted)}
+.home-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:start}
+.home-grid .panel{margin-bottom:0}
+.graph{position:relative;height:440px;border-radius:10px;background:radial-gradient(ellipse at 50% 45%,#161b26 0%,var(--surface) 70%);overflow:hidden;touch-action:none}
+.graph svg{width:100%;height:100%;display:block}
+.graph .edge{stroke:#3a4356;stroke-width:1.4;transition:stroke .15s,opacity .15s}
+.graph .node{cursor:pointer}
+.graph .node circle{transition:opacity .15s}
+.graph .node text{fill:var(--muted);font-size:11px;font-family:'Noto Sans KR',sans-serif;pointer-events:none;paint-order:stroke;stroke:#0e1014;stroke-width:3px;stroke-linejoin:round}
+.graph.hl .edge{opacity:.12}
+.graph.hl .edge.on{opacity:1;stroke:var(--accent);stroke-width:2}
+.graph.hl .node{opacity:.25}
+.graph.hl .node.on{opacity:1}
+.graph.hl .node.on text{fill:var(--text)}
+.graph .node.grp>circle:first-of-type,.graph .node.grp>path:first-child{filter:drop-shadow(0 0 5px rgba(122,162,255,.85))}
+.icard.grp{outline:2px solid var(--accent);outline-offset:2px}
+.gtip{position:absolute;pointer-events:none;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;max-width:260px;line-height:1.45;opacity:0;transition:opacity .12s;z-index:2}
+.gtip.show{opacity:1}
+.gtip .m{color:var(--muted);font-size:11px;margin-top:2px}
+.gempty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:12.5px;text-align:center;padding:20px;pointer-events:none}
+@media (max-width:980px){.home-grid{grid-template-columns:1fr}.graph{height:360px}}
+
+.empty h3{color:var(--text);margin:0 0 6px;font-size:16px}
+.empty .ways{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.empty .way{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;max-width:280px;font-size:12.5px}
+.empty .way b{display:block;color:var(--text);font-size:13px;margin-bottom:2px}
+
+/* ---------- cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;display:flex;flex-direction:column;gap:9px;position:relative;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--faint)}
+.card.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.card .t{font-weight:700;font-size:14.5px;line-height:1.4;letter-spacing:-.01em}
+.card .m{color:var(--muted);font-size:12px}
+.card .row{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.card .hl{font-size:12.5px;color:#c9cdd6;border-left:2px solid var(--accent);padding-left:9px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card .foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:4px}
+.ck{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--faint);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;background:var(--bg)}
+.ck.on{background:var(--accent);border-color:var(--accent)}
+.ck.on::after{content:"";width:9px;height:5px;border:2px solid #0b0d12;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.card .ck{position:absolute;top:14px;right:14px}
+.card.selmode .t{padding-right:24px}
+
+/* ---------- table ---------- */
+.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-weight:500;color:var(--muted);font-size:12px;padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;position:sticky;top:0;background:var(--surface)}
+th:hover{color:var(--text)}
+th .arr{opacity:.8;margin-left:3px}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--surface2)}
+tbody tr.sel td{background:var(--accent-weak)}
+td.title{font-weight:500;min-width:240px;max-width:380px}
+td .m{color:var(--muted);font-size:12px}
+td.nowrap{white-space:nowrap}
+
+/* ---------- kanban ---------- */
+.kanban{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:12px;overflow-x:auto;padding-bottom:6px}
+.col{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;min-height:200px;display:flex;flex-direction:column;gap:8px}
+.col.over{border-color:var(--accent);background:var(--accent-weak)}
+.col-h{display:flex;justify-content:space-between;align-items:center;padding:4px 4px 6px}
+.col-h .c{color:var(--faint);font-size:12px;font-variant-numeric:tabular-nums}
+.kcard{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 11px;cursor:grab;display:flex;flex-direction:column;gap:6px}
+.kcard:hover{border-color:var(--faint)}
+.kcard.drag{opacity:.4}
+.kcard .t{font-size:13px;font-weight:500;line-height:1.4}
+.kcard .m{font-size:11.5px;color:var(--muted)}
+.col .none{color:var(--faint);font-size:12px;text-align:center;padding:18px 0}
+
+/* ---------- drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(640px,100%);background:var(--surface);border-left:1px solid var(--border);z-index:41;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.d-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center}
+.d-body{padding:22px;overflow-y:auto;flex:1}
+.d-body h2{font-size:20px;line-height:1.35;margin:0 0 8px;letter-spacing:-.015em}
+.d-meta{color:var(--muted);font-size:13px;margin-bottom:12px}
+.d-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.quick{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin:14px 0 18px}
+.quick label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.quick select{background:var(--surface3);border:1px solid var(--border);border-radius:7px;padding:4px 8px}
+.rate{display:inline-flex;gap:1px}
+.rate button{border:0;background:transparent;font-size:18px;padding:0 1px;color:var(--surface3);line-height:1}
+.rate button.on{color:#f5c451}
+.sec{margin-bottom:18px}
+.sec h4{margin:0 0 5px;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.02em;display:flex;align-items:center;gap:7px}
+.sec h4 i{width:3px;height:12px;border-radius:2px;display:inline-block}
+.sec p{margin:0;white-space:pre-wrap;font-size:14px}
+.links{display:flex;flex-direction:column;gap:6px}
+.plink{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;cursor:pointer;font-size:13px}
+.plink:hover{border-color:var(--accent)}
+.plink .arrow{color:var(--accent)}
+.plink .m{color:var(--muted);font-size:11.5px;margin-left:auto;white-space:nowrap;align-self:flex-start}
+.plink .why{color:var(--muted);font-size:12px;margin-top:2px}
+.dates{display:flex;gap:18px;flex-wrap:wrap;color:var(--faint);font-size:12px;border-top:1px solid var(--border);padding-top:14px;margin-top:8px}
+
+/* ---------- modal ---------- */
+.modal{position:fixed;inset:0;z-index:50;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;background:rgba(0,0,0,.6)}
+.modal.open{display:flex}
+.mbox{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:min(760px,100%);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.mbox.sm{width:min(440px,100%)}
+.mh{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.mh h3{margin:0;font-size:16px}
+.mb{padding:20px 22px}
+.mf{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.fg .full{grid-column:1/-1}
+.fld label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
+.fld label em{font-style:normal;color:var(--faint);font-weight:400}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;outline:none}
+.fld textarea{resize:vertical;min-height:70px;line-height:1.55}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--accent)}
+.fsec{grid-column:1/-1;font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.03em;margin-top:8px;padding-top:12px;border-top:1px solid var(--border)}
+.fsec:first-child{margin-top:0;padding-top:0;border-top:0}
+.rel-list{max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--bg)}
+.rel-item{display:flex;align-items:center;gap:9px;padding:7px 10px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border)}
+.rel-item:last-child{border-bottom:0}
+.rel-item:hover{background:var(--surface2)}
+.rel-none{padding:12px;color:var(--faint);font-size:12.5px}
+.hint{font-size:11.5px;color:var(--faint);margin-top:4px}
+.out{width:100%;min-height:240px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--mono);font-size:12px;line-height:1.6;white-space:pre-wrap;resize:vertical;outline:none}
+.fmt{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+
+/* ---------- toast / notice ---------- */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--surface3);border:1px solid var(--border);padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;transition:all .2s;z-index:60;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.notice{background:rgba(242,181,82,.1);border:1px solid rgba(242,181,82,.35);color:#f3d199;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:14px}
+.loading{color:var(--muted);padding:60px 0;text-align:center}
+
+.space{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:3px}
+.space button{border:0;background:transparent;color:var(--muted);padding:6px 13px;border-radius:7px;font-size:13px;font-weight:600}
+.space button[data-s=papers].on{background:rgba(142,168,255,.16);color:#c9d3ff}
+.space button[data-s=ins].on{background:rgba(240,168,104,.17);color:#f7caa2}
+body.space-ins{--accent:#f0a868;--accent-weak:rgba(240,168,104,.14)}
+body.space-ins .top{border-bottom-color:rgba(240,168,104,.3)}
+body.space-ins .hero h1{color:#f7d9bd}
+.itype{display:inline-flex;font-size:11px;font-weight:600;padding:1px 7px;border-radius:5px;border:1px solid;white-space:nowrap}
+.icanvas{position:relative;height:calc(100vh - 250px);min-height:460px;border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:grab;touch-action:none;background-color:#12141a;background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 1px);background-size:22px 22px}
+.icanvas.panning{cursor:grabbing}
+.iworld{position:absolute;left:0;top:0;width:0;height:0}
+.iarrows{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.iarrows path.ia{stroke:#f0a868;stroke-width:1.6;fill:none;opacity:.85}
+.icard{position:absolute;width:230px;background:var(--surface2);border:1px solid var(--border);border-top:3px solid var(--tc);border-radius:10px;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:6px;box-shadow:0 6px 18px rgba(0,0,0,.3);user-select:none;touch-action:none}
+.icard:hover{border-color:#4a5263;border-top-color:var(--tc)}
+.icard.dragging{box-shadow:0 14px 34px rgba(0,0,0,.5);z-index:5;cursor:grabbing}
+.icard.flat{position:relative;width:auto;box-shadow:none;touch-action:auto}
+.ic-top{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.ic-t{font-weight:700;font-size:13.5px;line-height:1.4}
+.ic-b{font-size:12.5px;color:#c9cdd6;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.ic-p{display:flex;gap:4px;flex-wrap:wrap}
+.pchip{font-size:11px;color:#c9d3ff;background:rgba(142,168,255,.12);border:1px solid rgba(142,168,255,.3);border-radius:5px;padding:1px 6px;cursor:pointer}
+.pchip:hover{background:rgba(142,168,255,.22)}
+.ctools{position:absolute;right:12px;top:12px;display:flex;gap:6px}
+.chint{position:absolute;left:12px;bottom:10px;font-size:11.5px;color:var(--faint);pointer-events:none}
+.kanban.ik{grid-template-columns:repeat(5,minmax(220px,1fr))}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:1px solid var(--border);background:var(--bg);color:var(--muted);padding:6px 12px;border-radius:8px;font-size:13px}
+.seg button.on{color:var(--tc);border-color:var(--tc);background:rgba(255,255,255,.04)}
+.inscnt{font-size:11.5px;color:#f0a868;white-space:nowrap}
+.rcol{display:flex;flex-direction:column;gap:16px}
+.no{font-family:var(--mono);font-size:11.5px;color:var(--accent);background:var(--accent-weak);border-radius:5px;padding:0 6px;margin-right:6px;white-space:nowrap}
+.ptype{font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:0 6px;margin-left:6px;white-space:nowrap}
+.gtoggle{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer}
+.graph .iedge{stroke:#f0a868;stroke-dasharray:4 4;opacity:.55}
+.graph.hl .iedge.on{stroke:#f0a868;opacity:1}
+.drawer.ins{border-left-color:rgba(240,168,104,.35)}
+@media (max-width:640px){.kanban.ik{grid-template-columns:repeat(5,82vw)}.icanvas{height:calc(100vh - 330px)}.space button{padding:6px 10px}}
+@media (max-width:860px){
+  .tiles{grid-template-columns:repeat(3,1fr)}
+  .tiles .tile:first-child{grid-column:1/-1}
+  .bar{grid-template-columns:100px 1fr 54px}
+}
+@media (max-width:640px){
+  .top-in{padding:10px 14px;gap:10px}
+  main{padding:14px}
+  .brand .bt{font-size:15px}
+  .tabs{order:3;width:100%;justify-content:space-between}
+  .tabs button{flex:1;padding:7px 4px}
+  .btn .lbl{display:none}
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .fg{grid-template-columns:1fr}
+  .modal{padding:0}
+  .mbox{border-radius:0;min-height:100%;border:0}
+  .kanban{grid-template-columns:repeat(4,82vw)}
+  .hero h1{font-size:23px}
+  .hero .meta{text-align:left}
+}
+/* ---------- graph zoom · keyword ---------- */
+.graph{cursor:grab}
+.graph.panning{cursor:grabbing}
+.gtools{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:4px;z-index:3}
+.gtools button{width:30px;height:30px;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:8px;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0}
+.gtools button:hover{background:var(--surface3)}
+.gzoom{position:absolute;left:10px;bottom:8px;font-size:11px;color:var(--faint);pointer-events:none;font-variant-numeric:tabular-nums}
+.graph.nolabel .node text{display:none}
+.graph.nolabel .node.on text,.graph.nolabel.kw .node.match text{display:block}
+.graph.kw .node{opacity:.13}
+.graph.kw .node.match{opacity:1}
+.graph.kw .node.match text{fill:var(--text)}
+.graph.kw .edge{opacity:.05}
+.graph.kw .edge.match{opacity:.95;stroke:var(--accent)}
+.gkw{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 8px}
+.gkw .search{flex:1 1 220px}
+.gkw .search input{padding:6px 10px 6px 32px;font-size:13px}
+.gmatch{font-size:12px;color:var(--muted);white-space:nowrap}
+.kchips{display:flex;gap:5px;flex-wrap:wrap;margin:0 0 10px}
+.kchip{font-size:11.5px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:2px 9px;border-radius:999px;cursor:pointer;user-select:none}
+.kchip:hover{border-color:var(--faint)}
+.kchip.on{color:var(--accent)!important;border-color:var(--accent);background:var(--accent-weak)}
+.kchip small{color:var(--faint);margin-left:4px;font-variant-numeric:tabular-nums}
+.kchip.kmore-t{background:transparent;border-style:dashed;color:var(--faint)}
+.kchip.kmore-t:hover{color:var(--text)}
+/* ---------- access (free / paid) ---------- */
+.acc{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:1px 7px;border-radius:5px;border:1px solid;white-space:nowrap}
+.acc.free{color:#5fd394;border-color:#5fd39455;background:#5fd3941a}
+.acc.copy{color:#5cc8e0;border-color:#5cc8e055;background:#5cc8e01a}
+.acc.paid{color:#e0707a;border-color:#e0707a55;background:#e0707a1a}
+.nudge{background:var(--surface);border:1px dashed var(--border);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--muted);margin:-6px 0 16px;cursor:pointer}
+.nudge:hover{border-color:var(--accent)}
+.nudge b{color:var(--text)}
+.more{display:flex;justify-content:center;margin-top:14px}
+.dovl{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;animation:dfade .12s ease-out}
+.dbox{background:var(--surface2);border:1px solid rgba(242,181,82,.45);border-radius:14px;width:min(400px,100%);padding:24px 24px 18px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.6);animation:dpop .16s ease-out}
+.dic{width:42px;height:42px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#f2b552;background:rgba(242,181,82,.14);border:1px solid rgba(242,181,82,.4)}
+.dbox h3{margin:0 0 8px;font-size:17px}
+.dbox p{margin:0 0 20px;color:var(--text);font-size:13.5px;line-height:1.6}
+.dbox p span{color:var(--muted);font-size:12.5px}
+.dbtns{display:flex;gap:8px;justify-content:center}
+.dbtns .btn{flex:1;justify-content:center;padding:10px 12px;font-size:14px}
+@keyframes dfade{from{opacity:0}}
+@keyframes dpop{from{transform:scale(.94);opacity:0}}
+/* ---------- ask (Q&A) ---------- */
+.ask{max-width:880px;margin:0 auto}
+.askbox{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.askbox textarea{width:100%;min-height:86px;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 12px;outline:none;resize:vertical;line-height:1.55}
+.askbox textarea:focus{border-color:var(--accent)}
+.askrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.askrow .hint{margin:0;flex:1 1 180px}
+.answer{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-top:14px}
+.answer .q{font-weight:700;font-size:15px;margin-bottom:10px;white-space:pre-wrap}
+.answer .body{font-size:14px;line-height:1.75}
+.answer .body p{margin:0 0 10px}
+.answer .body ul{margin:0 0 10px;padding-left:20px}
+.answer .body li{margin-bottom:3px}
+.answer .body h5{font-size:13px;margin:14px 0 6px;color:var(--accent)}
+.answer .srcs{border-top:1px solid var(--border);margin-top:12px;padding-top:12px}
+.answer .meta{color:var(--faint);font-size:12px;margin-top:10px}
+.cite{font-family:var(--mono);font-size:11.5px;color:var(--accent);background:var(--accent-weak);border-radius:5px;padding:0 5px;margin:0 1px;cursor:pointer;white-space:nowrap}
+.cite:hover{text-decoration:underline}
+.thinking{color:var(--muted)}
+.hist{margin-top:24px}
+.hist h3{font-size:13px;color:var(--muted);margin:0 0 8px;font-weight:700}
+.hist .plink .btn{margin-left:4px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand" id="brand" title="홈으로"><svg class="logo" viewBox="0 0 22 22" aria-hidden="true"><g stroke="#8ea8ff" stroke-width="1.3" stroke-linecap="round" opacity=".55"><line x1="5" y1="6" x2="16" y2="9"/><line x1="16" y1="9" x2="8" y2="17"/></g><circle cx="5" cy="6" r="2.6" fill="#8ea8ff"/><circle cx="16" cy="9" r="2.6" fill="none" stroke="#8ea8ff" stroke-width="1.5"/><circle cx="8" cy="17" r="2.6" fill="#8ea8ff"/></svg><div class="bt">Paper Wiki</div></div>
+    <div class="space" id="space"><button data-s="papers">논문</button><button data-s="ins">인사이트</button></div>
+    <nav class="tabs" id="tabs">
+      <button data-v="home">홈</button>
+      <button data-v="cards">카드</button>
+      <button data-v="table">표</button>
+      <button data-v="kanban">칸반</button>
+      <button data-v="ask">질문</button>
+    </nav>
+    <nav class="tabs" id="itabs" style="display:none"><button data-v="ins-canvas">캔버스</button><button data-v="ins-cards">카드</button><button data-v="ins-kanban">칸반</button></nav>
+    <div class="spacer"></div>
+    <button class="btn" id="selBtn" title="논문을 골라서 참고문헌 추출">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="lbl">참고문헌</span>
+    </button>
+    <div class="menu-wrap">
+      <button class="btn" id="menuBtn" title="백업">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg><span class="lbl">백업</span>
+      </button>
+      <div class="menu" id="menu">
+        <button data-act="json">JSON으로 백업<small>논문과 인사이트 전체, 다시 불러오기 가능</small></button>
+        <button data-act="csv">CSV로 내보내기<small>엑셀·구글 시트·노션에서 열기</small></button>
+        <div class="sep"></div>
+        <button data-act="import">JSON 백업 불러오기<small>같은 항목은 덮어쓰고, 새 항목은 추가</small></button>
+      </div>
+    </div>
+    <button class="btn primary" id="addBtn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">논문 추가</span>
+    </button>
+  </div>
+</header>
+
+<main id="main"><div class="loading">불러오는 중…</div></main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="논문 상세"></aside>
+
+<div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileIn" accept=".json,application/json" hidden>
+
+<script>
+/* ===== 로컬 저장소 연결 (Claude Code 버전) =====
+   claude.ai 아티팩트 db와 같은 모양의 인터페이스를 serve.py API로 구현한다.
+   Claude Code가 data/ 파일을 직접 고쳐도 몇 초 안에 화면에 반영된다(폴링).
+   질문 탭은 serve.py 의 /api/ask 가 내 PC의 Claude Code CLI(claude)를 불러 답한다. API 키를 쓰지 않는다. */
+(function(){
+  const POLL=2500;
+  const api=(p,opt)=>fetch('/api/'+p,Object.assign({cache:'no-store',headers:{'Content-Type':'application/json'}},opt||{}));
+  const err=(code,message)=>Object.assign(new Error(message),{code,message});
+  async function req(p,opt){
+    let r;
+    try{ r=await api(p,opt) }catch(e){ throw err('unavailable','로컬 서버에 연결할 수 없어요') }
+    if(r.status===404) throw err('invalid_argument','없는 문서예요');
+    if(!r.ok) throw err('invalid_argument',(await r.text())||'요청이 거부됐어요');
+    return r.json();
+  }
+  let seq=0; const rid=()=>Date.now().toString(36)+(seq++).toString(36)+Math.random().toString(36).slice(2,8);
+  const listeners=new Set();
+  const kick=()=>listeners.forEach(f=>f());
+  function snapDoc(id,data){return {id,exists:data!==undefined,data:()=>data,metadata:{fromCache:false,hasPendingWrites:false}}}
+  function docRef(col,id){
+    id=id||rid();
+    return {
+      id,path:col+'/'+id,
+      get:async()=>{try{const d=await req(col+'/'+encodeURIComponent(id));return snapDoc(id,d.data)}catch(e){if(e.message==='없는 문서예요')return snapDoc(id,undefined);throw e}},
+      set:async data=>{await req(col+'/'+encodeURIComponent(id),{method:'PUT',body:JSON.stringify(data)});kick()},
+      update:async data=>{await req(col+'/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify(data)});kick()},
+      delete:async()=>{await req(col+'/'+encodeURIComponent(id),{method:'DELETE'});kick()},
+      onSnapshot(next,onErr){
+        let last=null,stop=false;
+        const tick=async()=>{if(stop)return;try{const s=await this.get();const k=JSON.stringify(s.exists?s.data():null);if(k!==last){last=k;next(s)}}catch(e){}};
+        listeners.add(tick);tick();const t=setInterval(tick,POLL);
+        return()=>{stop=true;clearInterval(t);listeners.delete(tick)};
+      }
+    };
+  }
+  function colRef(col){
+    return {
+      path:col,
+      doc:id=>docRef(col,id),
+      add:async data=>{const r=docRef(col);await r.set(data);return r},
+      get:async()=>{const L=await req(col);const docs=L.map(x=>snapDoc(x.id,x.data));return {docs,size:docs.length,empty:!docs.length,docChanges:()=>[],metadata:{fromCache:false,hasPendingWrites:false}}},
+      onSnapshot(next,onErr){
+        let last=null,stop=false,fails=0;
+        const tick=async()=>{if(stop)return;try{const s=await this.get();fails=0;const k=JSON.stringify(s.docs.map(d=>[d.id,d.data()]));if(k!==last){last=k;next(s)}}catch(e){if(++fails===3&&onErr)onErr(e)}};
+        listeners.add(tick);tick();const t=setInterval(tick,POLL);
+        return()=>{stop=true;clearInterval(t);listeners.delete(tick)};
+      }
+    };
+  }
+  const db={collection:colRef,doc:p=>{const [c,i]=p.split('/');return docRef(c,i)}};
+  const downloads={save:async({filename,data})=>{
+    const blob=data instanceof Blob?data:new Blob([data]);
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.append(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);return {status:'saved'};
+  }};
+  // 질문: claude.ai 의 sample 과 같은 모양. 스트리밍 없이 답이 다 만들어지면 한 번에 보여 준다.
+  const sample=async(input,opts={})=>{
+    const turns=typeof input==='string'?[{role:'user',content:input}]:input;
+    let r;
+    try{r=await fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({turns}),signal:opts.signal})}
+    catch(e){if(e&&e.name==='AbortError')throw {code:'cancelled',message:'cancelled'};throw {code:'upstream_error',message:'로컬 서버에 연결할 수 없어요'}}
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||typeof j.text!=='string'||!j.text.trim()) throw {code:j.code||'upstream_error',message:j.error||'답을 받지 못했어요'};
+    if(opts.onText) opts.onText({text:j.text,delta:j.text});
+    return {text:j.text,truncated:false,modelTierApplied:'default'};
+  };
+  const askReady=fetch('/api/ask',{cache:'no-store'}).then(r=>r.ok?r.json():{}).then(j=>!!j.available).catch(()=>false);
+  window.claude={use:async n=>n==='db'?db:n==='downloads'?downloads:n==='sample'?((await askReady)?sample:null):null};
+})();
+</script>
+<script>
+/* ================= constants ================= */
+const STATUSES = [
+  {k:'plan',  label:'읽을 예정', cls:'st-plan',   color:'var(--s-plan)'},
+  {k:'read',  label:'읽는 중',   cls:'st-read',   color:'var(--s-read)'},
+  {k:'done',  label:'다 읽음',   cls:'st-done',   color:'var(--s-done)'},
+  {k:'cancel',label:'취소',      cls:'st-cancel', color:'var(--s-cancel)'},
+];
+const ST = Object.fromEntries(STATUSES.map(s=>[s.k,s]));
+const SECTIONS = [
+  ['problem','문제','#8ea8ff'],['method','방법','#b48eff'],['result','결과','#5fd394'],
+  ['interesting','흥미로운 점','#f5c451'],['limitations','한계점','#e0707a'],
+  ['questions','궁금한 점','#5cc8e0'],['memo','메모','#9199a8'],
+];
+const FORMATS = [
+  {k:'bibtex',label:'BibTeX'},{k:'acs',label:'ACS'},{k:'apa',label:'APA'},
+  {k:'ieee',label:'IEEE'},{k:'nature',label:'Nature'},
+];
+
+/* ================= state ================= */
+const S = {
+  papers:[], byId:{}, loaded:false, dbErr:null, slow:false,
+  view:'home',
+  q:'', field:'', status:'', minRating:0,
+  sort:{key:'no',dir:'desc'},
+  selMode:false, sel:new Set(),
+  openId:null, fmt:'bibtex',
+  gk:'', gkExact:false, gview:null, acc:'', noThought:false, limit:60, klimit:40,
+};
+let db=null, downloads=null, papersCol=null, sample=null, qaCol=null;
+const PAGE=60, KPAGE=40, LONGPRESS=450;   // 길게 누르기 판정(ms)
+
+/* ================= utils ================= */
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today = ()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const yearOf = p=>{const m=String(p.pubDate||'').match(/\d{4}/);return m?m[0]:''};
+const splitList = s=>String(s||'').split(/[,;\n]/).map(x=>x.trim()).filter(Boolean);
+const arr = v=>Array.isArray(v)?v:(v?splitList(v):[]);
+function hueOf(str){let h=0;for(const c of str)h=(h*31+c.charCodeAt(0))>>>0;return h%360}
+const PALETTE=['#8ea8ff','#f5c451','#5fd394','#e98aa0','#b48eff','#5cc8e0','#f29a6b','#c3d36b','#d58ee8','#7fd1b9'];
+function fieldOrder(){const m={};for(const p of S.papers)for(const f of arr(p.fields))m[f]=(m[f]||0)+1;return Object.keys(m).sort((a,b)=>m[b]-m[a]||a.localeCompare(b))}
+function fieldColor(f){if(!f)return '#6b7383';const o=S._fo||(S._fo=fieldOrder());const i=o.indexOf(f);return i>=0&&i<PALETTE.length?PALETTE[i]:`hsl(${hueOf(f)} 62% 66%)`}
+function tagHTML(t){const c=fieldColor(t);return `<span class="tag" style="color:${c};border-color:${c}55;background:${c}1f">${esc(t)}</span>`}
+function statusHTML(k){const s=ST[k]||ST.plan;return `<span class="status ${s.cls}">${s.label}</span>`}
+function starsHTML(n){n=+n||0;if(!n)return '<span class="stars"><span class="off">☆☆☆☆☆</span></span>';return `<span class="stars">${'★'.repeat(n)}<span class="off">${'★'.repeat(5-n)}</span></span>`}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2400)}
+function linkOf(p){if(p.link)return p.link;if(p.doi)return 'https://doi.org/'+String(p.doi).replace(/^https?:\/\/(dx\.)?doi\.org\//,'');return ''}
+
+/* ---------- 무료/유료 (OpenAlex oa_status 기준) ---------- */
+const ACCESS={
+  gold:{c:'free',l:'무료',d:'오픈액세스 저널'},
+  hybrid:{c:'free',l:'무료',d:'구독 저널의 공개 논문'},
+  bronze:{c:'free',l:'무료',d:'출판사 무료 공개'},
+  free:{c:'free',l:'무료',d:'무료 공개 (OpenReview 등)'},
+  green:{c:'copy',l:'무료 사본',d:'프리프린트·기관 저장소 사본'},
+  closed:{c:'paid',l:'유료',d:'구독·기관 접속 필요'},
+};
+const ACC_GROUPS=[['free','무료'],['copy','무료 사본'],['paid','유료'],['unk','미확인']];
+const accGroup=p=>(ACCESS[p.access]||{c:'unk'}).c;
+function accHTML(p,long){const a=ACCESS[p.access];if(!a)return '';return `<span class="acc ${a.c}" title="${esc(a.d)}">${a.l}${long?` · ${esc(a.d)}`:''}</span>`}
+
+/* ---------- 관리 번호 ---------- */
+const noStr=p=>(+p.no>0)?String(+p.no).padStart(2,'0'):'';
+const noHTML=p=>noStr(p)?`<span class="no">#${noStr(p)}</span>`:'';
+const nextNo=()=>S.papers.reduce((m,p)=>Math.max(m,+p.no||0),0)+1;
+
+/* ---------- authors ---------- */
+const HANGUL=/[\uAC00-\uD7A3]/;
+const KO2=['남궁','제갈','선우','독고','황보','사공','서문','동방','망절','어금','장곡'];
+function parseName(s){
+  s=s.trim(); if(!s) return null;
+  const ko=HANGUL.test(s);
+  if(s.includes(',')){const [l,...f]=s.split(',');return {last:l.trim(),first:f.join(' ').trim(),ko}}
+  const parts=s.split(/\s+/);
+  if(ko){
+    if(parts.length>1) return {last:parts[0],first:parts.slice(1).join(''),ko};
+    if(s.length>=4&&KO2.includes(s.slice(0,2))) return {last:s.slice(0,2),first:s.slice(2),ko};
+    return s.length>1?{last:s[0],first:s.slice(1),ko}:{last:s,first:'',ko};
+  }
+  if(parts.length===1) return {last:s,first:'',ko};
+  const last=parts.pop(); return {last,first:parts.join(' '),ko};
+}
+const authorsOf = p=>arr(p.authors).map(parseName).filter(Boolean);
+function initials(first){
+  if(!first) return '';
+  return first.split(/\s+/).filter(Boolean).map(w=>w.split('-').map(x=>x? x[0].toUpperCase()+'.':'').join('-')).join(' ');
+}
+function shortAuthors(p){
+  const a=authorsOf(p); if(!a.length) return '';
+  if(a.length===1) return a[0].last;
+  if(a.length===2) return a[0].last+', '+a[1].last;
+  return a[0].last+' et al.';
+}
+
+/* ================= citations ================= */
+const PUBTYPES=[{k:'article',label:'학술지 논문'},{k:'conference',label:'학회 논문 (프로시딩)'},{k:'workshop',label:'워크숍 논문'},{k:'preprint',label:'프리프린트'},{k:'chapter',label:'책 챕터'},{k:'other',label:'기타'}];
+const PT=Object.fromEntries(PUBTYPES.map(t=>[t.k,t]));
+function guessType(p){
+  const j=String(p.journal||''), all=j+' '+(p.doi||'')+' '+(p.link||'');
+  if(/10\.1016\/B978|10\.1007\/978|\b978-/i.test(all)||/handbook|book chapter/i.test(j)) return 'chapter';
+  if(/arxiv|chemrxiv|biorxiv|medrxiv|ssrn|research ?square|preprint/i.test(all)) return 'preprint';
+  if(/workshop/i.test(j)) return 'workshop';
+  if(/proceedings|proc\.|conference|symposium|neurips|icml|iclr|aaai|cvpr|iccv|eccv|acl|emnlp|kdd/i.test(j)) return 'conference';
+  return 'article';
+}
+const ptypeOf=p=>PT[p.pubType]?p.pubType:guessType(p);
+const ptypeLabel=p=>{const t=ptypeOf(p);return t==='article'?'':PT[t].label};
+function arxivId(p){
+  const s=String(p.doi||'')+' '+String(p.link||'');
+  let m=s.match(/arxiv\.(\d{4}\.\d{4,5})/i)||s.match(/arxiv\.org\/(?:abs|pdf)\/([^\s?#]+?)(?:v\d+)?(?:\.pdf)?(?:[?#\s]|$)/i);
+  return m?m[1]:'';
+}
+const bibEsc=s=>String(s).replace(/([&%#_$])/g,'\\$1');
+const dash=s=>s.replace(/(\w)\s*(?:--|[-–])\s*(\w)/,'$1–$2');
+function bibKey(p){
+  const a=authorsOf(p)[0], y=yearOf(p);
+  let last=a&&!a.ko?a.last.normalize('NFD').replace(/[^A-Za-z]/g,''):'';
+  const w=(String(p.title||'').normalize('NFD').match(/[A-Za-z]{3,}/)||[''])[0];
+  if(!last) last='ref'+(+p.no||'');
+  return (last+y+w).toLowerCase();
+}
+function cite(p, fmt, idx, key){
+  const A=authorsOf(p), y=yearOf(p), title=(p.title||'').trim(), type=ptypeOf(p);
+  const ax=arxivId(p);
+  let j=(p.journal||'').trim();
+  if(type==='preprint'){ j=j.replace(/\s*\(?preprint\)?\s*/i,'').trim()||(ax?'arXiv':''); }
+  const vol=(p.volume||'').trim(), iss=(p.issue||'').trim(), pg=(p.pages||'').trim(), pub=(p.publisher||'').trim();
+  const doi=String(p.doi||'').replace(/^https?:\/\/(dx\.)?doi\.org\//,'').trim();
+  const url=doi?`https://doi.org/${doi}`:(ax?`https://arxiv.org/abs/${ax}`:(p.link||''));
+  const isRange=/\d\s*(--|[-–])\s*\d/.test(pg);
+  // 한국어 이름은 이니셜 없이 전체 이름 그대로
+  const lf=a=>a.ko?a.last+a.first:(a.first?`${a.last}, ${initials(a.first)}`:a.last);
+  const fl=a=>a.ko?a.last+a.first:(a.first?`${initials(a.first)} ${a.last}`:a.last);
+  const end=s=>s && !/[.?!]$/.test(s)? s+'.':s;
+  switch(fmt){
+    case 'bibtex':{
+      const au=A.map(a=>a.ko?`{${a.last}${a.first}}`:(a.first?`${a.last}, ${a.first}`:a.last)).join(' and ');
+      const pages=pg.replace(/(\w)\s*[-–]\s*(\w)/,'$1--$2');
+      let et, f;
+      if(type==='article'){et='article';f=[['author',au],['title',`{${bibEsc(title)}}`],['journal',bibEsc(j)],['year',y],['volume',vol],['number',iss],['pages',pages],['doi',doi],['url',doi?'':(p.link||'')]]}
+      else if(type==='conference'||type==='workshop'){et='inproceedings';f=[['author',au],['title',`{${bibEsc(title)}}`],['booktitle',bibEsc(j)],['year',y],['volume',vol],['pages',pages],['doi',doi],['url',doi?'':(p.link||'')],['note',type==='workshop'?'Workshop paper':'']]}
+      else if(type==='preprint'){et='misc';f=ax?[['author',au],['title',`{${bibEsc(title)}}`],['year',y],['eprint',ax],['archivePrefix','arXiv'],['doi',doi],['url',`https://arxiv.org/abs/${ax}`],['note','Preprint']]
+        :[['author',au],['title',`{${bibEsc(title)}}`],['howpublished',bibEsc(j)],['year',y],['doi',doi],['url',doi?'':(p.link||'')],['note','Preprint']]}
+      else if(type==='chapter'){et='incollection';f=[['author',au],['title',`{${bibEsc(title)}}`],['booktitle',bibEsc(j)],['publisher',bibEsc(pub)],['year',y],['pages',pages],['doi',doi],['url',doi?'':(p.link||'')]]}
+      else{et='misc';f=[['author',au],['title',`{${bibEsc(title)}}`],['howpublished',bibEsc(j||pub)],['year',y],['doi',doi],['url',doi?'':(p.link||'')]]}
+      return `@${et}{${key||bibKey(p)},\n`+f.filter(x=>x[1]).map(([k,v])=>`  ${k} = {${v}}`).join(',\n')+`\n}`;
+    }
+    case 'acs':{
+      let s=end(A.map(lf).join('; '));
+      s+=(s?' ':'')+end(title);
+      if(type==='article'){
+        if(j) s+=` ${j}`; if(y) s+=` ${y}`; if(vol) s+=`, ${vol}`; if(iss) s+=` (${iss})`; if(pg) s+=`, ${dash(pg)}`;
+        s=end(s.trim());
+      }else if(type==='conference'||type==='workshop'){
+        if(j) s+=` In ${j};`; if(y) s+=` ${y}`; if(pg) s+=`; ${isRange?'pp ':''}${dash(pg)}`;
+        s=end(s.trim().replace(/;$/,''));
+      }else if(type==='preprint'){
+        s+=` ${j||'Preprint'}${y?` ${y}`:''}${ax?`, ${ax}`:''} (preprint).`;
+      }else if(type==='chapter'){
+        if(j) s+=` In ${j};`; if(pub) s+=` ${pub},`; if(y) s+=` ${y}`; if(pg) s+=`; ${isRange?'pp ':''}${dash(pg)}`;
+        s=end(s.trim().replace(/[;,]$/,''));
+      }else{ if(j) s+=` ${j}`; if(y) s+=`, ${y}`; s=end(s.trim()); }
+      if(doi) s+=` DOI: ${doi}.`; else if(url&&type!=='article') s+=` ${url}.`;
+      return s;
+    }
+    case 'apa':{
+      const L=A.map(lf); let au;
+      if(L.length===0) au='';
+      else if(L.length===1) au=L[0];
+      else if(L.length<=20) au=L.slice(0,-1).join(', ')+', & '+L[L.length-1];
+      else au=L.slice(0,19).join(', ')+', . . . '+L[L.length-1];
+      let s=(au?end(au)+' ':'')+`(${y||'n.d.'}). `;
+      if(type==='article'){ s+=end(title); if(j){s+=' '+j; if(vol) s+=', '+vol+(iss?`(${iss})`:''); if(pg) s+=', '+dash(pg); s+='.'} }
+      else if(type==='conference'){ s+=end(title); if(j){s+=` In ${j}`; if(pg) s+=` (${isRange?'pp. ':''}${dash(pg)})`; s+='.'} }
+      else if(type==='workshop'){ s+=`${title.replace(/\.$/,'')} [Paper presentation]. `; if(j) s+=end(j); }
+      else if(type==='preprint'){ s+=`${title.replace(/\.$/,'')} [Preprint]. `; if(j) s+=end(j); }
+      else if(type==='chapter'){ s+=end(title); if(j){s+=` In ${j}`; if(pg) s+=` (${isRange?'pp. ':''}${dash(pg)})`; s+='.'} if(pub) s+=' '+end(pub); }
+      else { s+=end(title); if(j) s+=' '+end(j); }
+      if(url) s+=' '+url;
+      return s.trim();
+    }
+    case 'ieee':{
+      const L=A.map(fl); let au;
+      if(L.length>6) au=L[0]+' et al.';
+      else if(L.length<=1) au=L[0]||'';
+      else if(L.length===2) au=L.join(' and ');
+      else au=L.slice(0,-1).join(', ')+', and '+L[L.length-1];
+      let s=`[${idx}] `+(au?au+', ':'')+`"${title.replace(/\.$/,'')},"`;
+      const parts=[];
+      if(type==='article'){ if(j) parts.push(j); if(vol) parts.push(`vol. ${vol}`); if(iss) parts.push(`no. ${iss}`); if(pg) parts.push(isRange?`pp. ${dash(pg)}`:`Art. no. ${pg}`); if(y) parts.push(y); }
+      else if(type==='conference'||type==='workshop'){ if(j) parts.push(`in ${/^proc/i.test(j)?j:(type==='conference'?'Proc. '+j:j)}`); if(y) parts.push(y); if(pg) parts.push(isRange?`pp. ${dash(pg)}`:`Art. no. ${pg}`); }
+      else if(type==='preprint'){ if(y) parts.push(y); parts.push(ax?`arXiv:${ax}`:(j?`${j} preprint`:'preprint')); }
+      else if(type==='chapter'){ if(j) parts.push(`in ${j}`); if(pub) parts.push(pub); if(y) parts.push(y); if(pg) parts.push(isRange?`pp. ${dash(pg)}`:pg); }
+      else { if(j) parts.push(j); if(y) parts.push(y); }
+      s+=' '+parts.join(', ');
+      if(doi) s+=`, doi: ${doi}.`; else if(url) s+=`. [Online]. Available: ${url}`; else s+='.';
+      return s;
+    }
+    case 'nature':{
+      const L=A.map(lf); let au;
+      if(L.length>5) au=L[0]+' et al.';
+      else if(L.length<=1) au=L[0]||'';
+      else au=L.slice(0,-1).join(', ')+' & '+L[L.length-1];
+      let s=`${idx}. `+(au?end(au)+' ':'')+end(title);
+      if(type==='article'){ if(j) s+=' '+j; if(vol) s+=' '+vol; if(pg) s+=', '+dash(pg); if(y) s+=` (${y})`; s+='.'; }
+      else if(type==='conference'||type==='workshop'){ if(j) s+=` In ${j}`; if(pg) s+=' '+dash(pg); if(y) s+=` (${y})`; s+='.'; }
+      else if(type==='preprint'){ s+=` Preprint at ${url||j}${y?` (${y})`:''}.`; }
+      else if(type==='chapter'){ if(j) s+=` In ${j}`; if(pg) s+=' '+dash(pg); const t=[pub,y].filter(Boolean).join(', '); if(t) s+=` (${t})`; s+='.'; }
+      else { if(j) s+=' '+j; if(y) s+=` (${y})`; s+='.'; }
+      if(doi&&type!=='preprint') s=s.replace(/\.$/,'')+'.';
+      return s;
+    }
+  }
+  return '';
+}
+
+/* ================= filtering ================= */
+function allFields(){const m={};for(const p of S.papers)for(const f of arr(p.fields))m[f]=(m[f]||0)+1;return m}
+function allKeywords(){const m={};for(const p of S.papers)for(const f of arr(p.keywords))m[f]=(m[f]||0)+1;return m}
+function filtered(){
+  const q=S.q.trim().toLowerCase();
+  let L=S.papers.filter(p=>{
+    if(S.field && !arr(p.fields).includes(S.field)) return false;
+    if(S.status && (p.status||'plan')!==S.status) return false;
+    if(S.minRating && (+p.rating||0)<S.minRating) return false;
+    if(S.acc && accGroup(p)!==S.acc) return false;
+    if(S.noThought && !((p.status||'plan')==='done' && !String(p.interesting||'').trim() && !String(p.questions||'').trim())) return false;
+    if(q){
+      const hay=['#'+noStr(p),String(+p.no||''),p.title,arr(p.authors).join(' '),p.journal,arr(p.fields).join(' '),arr(p.keywords).join(' '),p.problem,p.method,p.result,p.interesting,p.limitations,p.questions,p.memo,p.pubDate].join(' ').toLowerCase();
+      if(!q.split(/\s+/).every(w=>hay.includes(w))) return false;
+    }
+    return true;
+  });
+  const {key,dir}=S.sort, m=dir==='asc'?1:-1;
+  const val=p=>{
+    switch(key){
+      case 'no': return +p.no||0;
+      case 'title': return (p.title||'').toLowerCase();
+      case 'authors': return shortAuthors(p).toLowerCase();
+      case 'journal': return (p.journal||'').toLowerCase();
+      case 'pubDate': return p.pubDate||'';
+      case 'rating': return +p.rating||0;
+      case 'status': return STATUSES.findIndex(s=>s.k===(p.status||'plan'));
+      case 'fields': return arr(p.fields).join(',').toLowerCase();
+      case 'readAt': return p.readAt||'';
+      case 'links': return relOf(p.id);
+      case 'ins': return insOfPaper(p.id).length;
+      case 'access': return ['free','copy','paid','unk'].indexOf(accGroup(p));
+      default: return p.addedAt||'';
+    }
+  };
+  L.sort((a,b)=>{const x=val(a),y=val(b);return x<y?-m:x>y?m:0});
+  return L;
+}
+
+/* ================= rendering ================= */
+function setView(v){
+  if(['ins-canvas','ins-cards','ins-kanban'].includes(v)){S.space='ins';S.iview=v.slice(4)}
+  else{if(!['home','cards','table','kanban','ask'].includes(v)) v='home';S.space='papers';S.view=v}
+  const ins=S.space==='ins';
+  document.body.classList.toggle('space-ins',ins);
+  document.querySelectorAll('#space button').forEach(b=>b.classList.toggle('on',b.dataset.s===S.space));
+  $('#tabs').style.display=ins?'none':'';$('#itabs').style.display=ins?'':'none';
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.view));
+  document.querySelectorAll('#itabs button').forEach(b=>b.classList.toggle('on',b.dataset.v==='ins-'+S.iview));
+  $('#addBtn').querySelector('.lbl').textContent=ins?'인사이트 추가':'논문 추가';
+  $('#selBtn').style.display=ins?'none':'';
+  if(ins&&S.selMode){S.selMode=false;S.sel.clear()}
+  const hs=ins?'ins-'+S.iview:S.view;
+  if(location.hash.slice(1)!==hs){try{history.replaceState(null,'','#'+hs)}catch(e){location.hash=hs}}
+  render();
+}
+function render(){
+  const main=$('#main');
+  $('#selBtn').classList.toggle('on',S.selMode);
+  if(!S.loaded && !S.dbErr){
+    main.innerHTML=`<div class="loading">불러오는 중…${S.slow?'<br><small>저장소 응답이 늦어요. 잠시만 기다려 주세요.</small>':''}</div>`;return;
+  }
+  let pre='';
+  if(S.dbErr) pre=`<div class="notice">${esc(S.dbErr)}</div>`;
+  else if(S.slow && S.stale) pre=`<div class="notice">저장소와 연결이 늦어지고 있어요. 보이는 내용이 최신이 아닐 수 있어요.</div>`;
+  if(S.space==='ins'){main.innerHTML=pre+renderIns();bindIns();return}
+  if(S.view==='home'){main.innerHTML=pre+renderHome();bindMain();drawGraph();return}
+  if(S.view==='ask'){main.innerHTML=pre+renderAsk();bindAsk();return}
+  else main.innerHTML=pre+renderFilters()+renderSelBar()+(S.view==='cards'?renderCards():S.view==='table'?renderTable():renderKanban());
+  bindMain();
+}
+function renderHome(){
+  const N=S.papers.length;
+  const cnt=Object.fromEntries(STATUSES.map(s=>[s.k,0]));
+  for(const p of S.papers) cnt[p.status||'plan']=(cnt[p.status||'plan']||0)+1;
+  const nEdges=graphEdges().length, nFields=Object.keys(allFields()).length;
+  const lastAdd=S.papers.map(p=>p.addedAt||'').sort().pop()||'';
+  const fmtD=d=>{const m=d.match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${+m[2]}월 ${+m[3]}일`:d};
+  let h=`<div class="hero"><div><h1>${esc(S.cfg.title||'Paper Wiki')}</h1><p>${esc(S.cfg.subtitle||'')}</p></div>
+    ${S.papers.length?`<div class="meta">논문 <b>${S.papers.length}</b> · 분야 <b>${nFields}</b> · 연결 <b>${nEdges}</b>${lastAdd?`<br>최근 추가 <b>${esc(fmtD(lastAdd))}</b>`:''}<br>${(()=>{const c={free:0,copy:0,paid:0,unk:0};S.papers.forEach(p=>c[accGroup(p)]++);return `무료 <b>${c.free}</b> · 무료 사본 <b>${c.copy}</b> · 유료 <b>${c.paid}</b>${c.unk?` · 미확인 <b>${c.unk}</b>`:''}`})()}</div>`:''}</div>`;
+  h+=`<div class="tiles"><div class="tile" data-go="cards" data-st=""><div class="n">${N}</div><div class="l">전체 논문</div></div>`;
+  for(const s of STATUSES) h+=`<div class="tile" data-go="cards" data-st="${s.k}"><div class="n" style="color:${s.color}">${cnt[s.k]}</div><div class="l">${s.label}</div></div>`;
+  h+=`</div>`;
+  const noTh=S.papers.filter(p=>(p.status||'plan')==='done'&&!String(p.interesting||'').trim()&&!String(p.questions||'').trim()).length;
+  if(noTh) h+=`<div class="nudge" id="nudge">다 읽은 논문 <b>${noTh}</b>편에 아직 내 생각(흥미로운 점·궁금한 점)이 없어요. 한 줄씩 적어 두면 나중에 질문할 때도 근거로 쓰여요. <span style="color:var(--accent)">보기 →</span></div>`;
+  if(!N){
+    h+=`<div class="panel empty"><h3>아직 정리한 논문이 없어요</h3><div>두 가지 방법으로 추가할 수 있어요.</div>
+      <div class="ways"><div class="way"><b>직접 입력</b>오른쪽 위 <b style="display:inline;color:var(--accent)">논문 추가</b> 버튼을 눌러 칸을 채워요.</div>
+      <div class="way"><b>Claude에게 맡기기</b>Claude Code에 논문 링크나 DOI를 주면 data/papers/ 에 파일로 정리해 넣어 줘요.</div></div></div>`;
+    return h;
+  }
+  // field stats
+  const fm={};
+  for(const p of S.papers){const fs=arr(p.fields);for(const f of (fs.length?fs:['(분야 없음)'])){fm[f]=fm[f]||{total:0};fm[f].total++;fm[f][p.status||'plan']=(fm[f][p.status||'plan']||0)+1}}
+  const rows=Object.entries(fm).sort((a,b)=>b[1].total-a[1].total);
+  const max=Math.max(...rows.map(r=>r[1].total));
+  const ne=graphEdges().length;
+  h+=`<div class="home-grid"><div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2>논문 연결 지도</h2><div style="display:flex;gap:12px;align-items:center">${S.insights.length?`<label class="gtoggle"><input type="checkbox" id="gIns" ${S.gShowIns?'checked':''}> 인사이트 표시</label>`:''}<button class="btn" id="gRelayout" title="선이 덜 겹치게 전체 배치를 다시 계산해요" style="padding:4px 10px;font-size:12px">↻ 배치 새로고침</button></div></div><p class="sub">${ne?`연결 ${ne}개 · 점을 누르면 상세, 끌면 위치 이동(저장됨), 길게 눌렀다 끌면 이어진 묶음 전체 이동. 빈 곳을 끌면 화면 이동, 휠·두 손가락·+/− 버튼으로 확대/축소해요.`:'아직 연결된 논문이 없어요. 편집에서 관련 논문을 연결하면 선으로 이어져요.'}</p>`;
+  // 칩은 두 편 이상이 함께 쓴 키워드만 (한 편에만 있는 키워드는 지도에서 묶어 볼 게 없음)
+  const kwTop=Object.entries(allKeywords()).filter(([,c])=>c>=2).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,20);
+  const fTop=Object.entries(allFields()).sort((a,b)=>b[1]-a[1]);
+  const chip=(t,c,isF)=>`<span class="kchip ${S.gkExact&&S.gk===t?'on':''}" data-kw="${esc(t)}" ${isF?`style="color:${fieldColor(t)}"`:''} title="${isF?'분야':'키워드'} · ${c}편">${esc(t)}<small>${c}</small></span>`;
+  h+=`<div class="gkw"><div class="search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="gkq" list="dlKw" placeholder="키워드·분야·제목으로 지도에서 찾기" value="${esc(S.gk)}" autocomplete="off"></div><span class="gmatch" id="gMatch"></span></div>
+    <datalist id="dlKw">${Object.keys(allKeywords()).sort().map(k=>`<option value="${esc(k)}">`).join('')}</datalist>
+    <div class="kchips" id="gChips">${fTop.map(([f,c])=>chip(f,c,true)).join('')}${S.gkMore?kwTop.map(([k,c])=>chip(k,c,false)).join(''):(S.gkExact&&S.gk&&!allFields()[S.gk]&&allKeywords()[S.gk]?chip(S.gk,allKeywords()[S.gk],false):'')}${kwTop.length?`<span class="kchip kmore-t" id="gKwMore" title="두 편 이상이 함께 쓴 키워드 ${kwTop.length}개 (전체 ${Object.keys(allKeywords()).length}개 중). 나머지는 검색창에 입력하면 찾을 수 있어요">${S.gkMore?'키워드 접기 ▴':`공통 키워드 ${kwTop.length}개 ▾`}</span>`:''}</div>
+    <div class="graph" id="graph"><div class="gtip" id="gtip"></div><div class="gtools"><button id="gZin" title="확대" aria-label="확대">+</button><button id="gZout" title="축소" aria-label="축소">−</button><button id="gFit" title="전체 보기 (찾는 중이면 일치한 논문에 맞춤)" aria-label="전체 보기">⤢</button></div><div class="gzoom" id="gZoom"></div></div><div class="legend" id="gLegend"></div></div>`;
+  h+='<div class="rcol">';
+  h+=`<div class="panel"><h2>분야별 논문 수</h2><p class="sub">한 논문에 분야가 여러 개면 각 분야에 모두 세요. 막대를 누르면 그 분야 논문만 볼 수 있어요.</p><div class="bars">`;
+  for(const [f,c] of rows){
+    h+=`<div class="bar" data-field="${esc(f==='(분야 없음)'?'':f)}"><div class="name" title="${esc(f)}">${esc(f)}</div><div class="track">`;
+    for(const s of STATUSES) if(c[s.k]) h+=`<div class="seg" style="width:${c[s.k]/max*100}%;background:${s.color}" title="${s.label} ${c[s.k]}편"></div>`;
+    h+=`</div><div class="num"><b>${c.total}</b>편</div></div>`;
+  }
+  h+=`</div><div class="legend">${STATUSES.map(s=>`<span><i style="background:${s.color}"></i>${s.label}</span>`).join('')}</div></div>${renderRecentIns()}</div></div>`;
+  return h;
+}
+
+/* ================= connection graph ================= */
+function graphEdges(){
+  const seen=new Set(), out=[];
+  for(const p of S.papers) for(const r of arr(p.related)){
+    if(!S.byId[r]||r===p.id) continue;
+    const k=p.id<r?p.id+'|'+r:r+'|'+p.id;
+    if(!seen.has(k)){seen.add(k);out.push(p.id<r?[p.id,r]:[r,p.id])}
+  }
+  return out;
+}
+S.gpos=S.gpos||{};
+let layoutRef=null;
+async function saveLayout(){
+  if(!layoutRef) return;
+  const keep=new Set([...S.papers.map(p=>p.id),...S.insights.map(i=>'i:'+i.id)]);
+  const pos={};
+  for(const [k,v] of Object.entries(S.gpos)) if(keep.has(k)) pos[k]={x:Math.round(v.x*10000)/10000,y:Math.round(v.y*10000)/10000};
+  const js=JSON.stringify(pos); if(js===S._savedLayout) return;
+  S._savedLayout=js;
+  try{await withRetry(()=>layoutRef.set({pos,updatedAt:new Date().toISOString()}))}catch(e){S._savedLayout=null}
+}
+function drawGraph(){
+  const box=$('#graph'); if(!box) return;
+  if(!S.layoutLoaded){box.querySelector('svg')?.remove();return}
+  // VW×VH = 화면 크기, W×H = 지도 세계 크기 (논문이 많으면 세계를 넓히고 축소해서 보여줌)
+  const VW=box.clientWidth||600, VH=box.clientHeight||440, M=46;
+  const NP=S.papers.length+(S.gShowIns?S.insights.length:0), GS=NP>60?Math.sqrt(NP/60):1, W=VW*GS, H=VH*GS;
+  const fitK=1/GS;
+  const newView=!S.gview||S.gview.gs!==GS||S.gview.vw!==VW;
+  if(newView) S.gview={k:fitK,x:0,y:0,gs:GS,vw:VW};
+  const V=S.gview;
+  const nodes=S.papers.map((p,i)=>{
+    const c=S.gpos[p.id], a=i/Math.max(1,S.papers.length)*Math.PI*2;
+    return {id:p.id,p,x:c?c.x*W:W/2+Math.cos(a)*Math.min(W,H)*.3,y:c?c.y*H:H/2+Math.sin(a)*Math.min(W,H)*.3,vx:0,vy:0,fresh:!c};
+  });
+  const showIns=S.gShowIns&&S.insights.length>0;
+  if(showIns) S.insights.forEach(ins=>{const key='i:'+ins.id,c=S.gpos[key];nodes.push({id:key,ins,kind:'ins',x:c?c.x*W:W/2+(Math.random()-.5)*W*.5,y:c?c.y*H:H/2+(Math.random()-.5)*H*.5,vx:0,vy:0,fresh:!c})});
+  const idx=Object.fromEntries(nodes.map((n,i)=>[n.id,i]));
+  const edges=graphEdges().map(([a,b])=>[idx[a],idx[b]]);
+  const ekind=edges.map(()=>'p');
+  if(showIns) for(const ins of S.insights){const a=idx['i:'+ins.id];for(const pid of arr(ins.papers)) if(idx[pid]!=null){edges.push([a,idx[pid]]);ekind.push('ip')}for(const t of arr(ins.links)) if(idx['i:'+t]!=null){edges.push([a,idx['i:'+t]]);ekind.push('ii')}}
+  const deg=nodes.map(()=>0); edges.forEach(([a,b])=>{deg[a]++;deg[b]++});
+  // force layout + crossing reduction
+  const L=Math.max(80,Math.min(W*.9,H)/(1.15+Math.sqrt(nodes.length)/2.4));
+  // 논문이 많을 때 멈추지 않도록 계산량을 줄임
+  const ITERS=nodes.length<=120?420:Math.max(60,Math.round(420*120/nodes.length)), TRIES=nodes.length>120?1:8;
+  const force=iters=>{
+    for(let t=0;t<iters;t++){
+    const cool=1-t/iters;
+    for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
+      const a=nodes[i],b=nodes[j];let dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy+.01;
+      if(d2<1){dx=Math.random()-.5;dy=Math.random()-.5;d2=.5}
+      const f=L*L*1.1/d2, d=Math.sqrt(d2);
+      a.vx+=dx/d*f;a.vy+=dy/d*f;b.vx-=dx/d*f;b.vy-=dy/d*f;
+    }
+    for(const [i,j] of edges){
+      const a=nodes[i],b=nodes[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)||1,f=(d-L)*.06;
+      a.vx+=dx/d*f;a.vy+=dy/d*f;b.vx-=dx/d*f;b.vy-=dy/d*f;
+    }
+    for(const n of nodes){
+      n.vx+=(W/2-n.x)*.006;n.vy+=(H/2-n.y)*.006;
+      const sp=Math.hypot(n.vx,n.vy),cap=12*cool+1;
+      if(sp>cap){n.vx*=cap/sp;n.vy*=cap/sp}
+      n.x=Math.max(M,Math.min(W-M,n.x+n.vx));n.y=Math.max(M-16,Math.min(H-M,n.y+n.vy));
+      n.vx*=.55;n.vy*=.55;
+    }
+  }
+  };
+  const rOf=n=>n.kind==='ins'?7:8+(+n.p.rating||0)*1.6+(isHub(n.id)?2:0);
+  const R=nodes.map(rOf);
+  const crossCount=()=>{let c=0;const d=(a,b,q)=>(b.x-a.x)*(q.y-a.y)-(b.y-a.y)*(q.x-a.x);
+    for(let k=0;k<edges.length;k++)for(let m=k+1;m<edges.length;m++){const [a,b]=edges[k],[u,v]=edges[m];if(u===a||u===b||v===a||v===b)continue;
+      const A=nodes[a],B=nodes[b],U=nodes[u],V=nodes[v];if(d(U,V,A)*d(U,V,B)<0&&d(A,B,U)*d(A,B,V)<0)c++}return c};
+  const fresh=nodes.filter(n=>n.fresh);
+  const fullRun=S._relayout||(fresh.length===nodes.length&&nodes.length>1);
+  S._relayout=false;
+  if(fullRun){
+    let best=null;const t0=performance.now();
+    for(let a=0;a<TRIES;a++){
+      if(a>0){if(performance.now()-t0>700)break;nodes.forEach(n=>{n.x=M+Math.random()*(W-2*M);n.y=M+Math.random()*(H-2*M);n.vx=0;n.vy=0})}
+      force(ITERS);if(nodes.length<=200&&edges.length<=400)untangle(nodes,edges,R,W,H,M,L,true);
+      const c=edges.length>600?0:crossCount();
+      if(!best||c<best.c)best={c,pos:nodes.map(n=>[n.x,n.y])};
+      if(c===0)break;
+    }
+    best.pos.forEach(([x,y],i)=>{nodes[i].x=x;nodes[i].y=y});
+  }else if(fresh.length){
+    // 기존 점은 그대로 두고, 새 점만 연결된 점 근처의 빈자리에 놓기
+    const placed=nodes.filter(n=>!n.fresh);
+    for(const n of fresh){
+      const i=idx[n.id], nb=[];
+      edges.forEach(([a,b])=>{if(a===i&&!nodes[b].fresh)nb.push(nodes[b]);if(b===i&&!nodes[a].fresh)nb.push(nodes[a])});
+      const cand=[];
+      if(nb.length){const cx=nb.reduce((s,q)=>s+q.x,0)/nb.length,cy=nb.reduce((s,q)=>s+q.y,0)/nb.length;
+        for(const r of [L*.7,L,L*1.4]) for(let k=0;k<16;k++){const t=k/16*Math.PI*2;cand.push([cx+Math.cos(t)*r,cy+Math.sin(t)*r])}}
+      else for(let gx=0;gx<12;gx++)for(let gy=0;gy<8;gy++)cand.push([M+(gx+.5)/12*(W-2*M),M+(gy+.5)/8*(H-2*M)]);
+      let best=null;
+      for(let [x,y] of cand){x=Math.max(M,Math.min(W-M,x));y=Math.max(M-16,Math.min(H-M,y));
+        let md=1e9;for(const q of placed)md=Math.min(md,Math.hypot(q.x-x,q.y-y));
+        const sc=Math.min(md,L*1.2)-(nb.length?nb.reduce((s,q)=>s+Math.hypot(q.x-x,q.y-y),0)/nb.length*.15:0);
+        if(!best||sc>best.s)best={s:sc,x,y}}
+      n.x=best.x;n.y=best.y;n.fresh=false;placed.push(n);
+    }
+  }
+  nodes.forEach(n=>S.gpos[n.id]={x:n.x/W,y:n.y/H});
+  if(fullRun||fresh.length) saveLayout();
+  const NS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox',`0 0 ${VW} ${VH}`);
+  const gW=document.createElementNS(NS,'g'), gE=document.createElementNS(NS,'g'), gN=document.createElementNS(NS,'g');
+  gW.append(gE,gN);svg.append(gW);
+  const lines=edges.map(([i,j],k)=>{const l=document.createElementNS(NS,'line');l.setAttribute('class','edge'+(ekind[k]!=='p'?' iedge':''));gE.append(l);return l});
+  const gs=nodes.map(n=>{
+    const g=document.createElementNS(NS,'g');g.setAttribute('class','node');
+    if(n.kind==='ins'){
+      const t=IT[n.ins.type]||IT.idea;
+      const dm=document.createElementNS(NS,'path');dm.setAttribute('d','M0 -9L9 0L0 9L-9 0Z');dm.setAttribute('fill',t.color);dm.setAttribute('stroke',INS_ACCENT);dm.setAttribute('stroke-width','1.6');
+      const tx=document.createElementNS(NS,'text');tx.setAttribute('text-anchor','middle');tx.setAttribute('y',23);tx.style.fill='#e8b48a';
+      const tt=insTitle(n.ins);tx.textContent=tt.length>12?tt.slice(0,12)+'…':tt;
+      g.append(dm,tx);gN.append(g);return g;
+    }
+    const st=ST[n.p.status||'plan'];
+    const r=rOf(n), fs=arr(n.p.fields);
+    if(isHub(n.id)){const halo=document.createElementNS(NS,'circle');halo.setAttribute('r',r+9);halo.setAttribute('fill','rgba(245,196,81,.08)');halo.setAttribute('stroke','#f5c451');halo.setAttribute('stroke-width','1.3');halo.setAttribute('stroke-dasharray','3 3');g.append(halo)}
+    const ring=document.createElementNS(NS,'circle');ring.setAttribute('r',r+3);ring.setAttribute('fill','none');ring.setAttribute('stroke',st.color);ring.setAttribute('stroke-width','2.2');
+    g.append(ring);
+    if(fs.length<=1){const c=document.createElementNS(NS,'circle');c.setAttribute('r',r);c.setAttribute('fill',fieldColor(fs[0]));g.append(c)}
+    else fs.forEach((f,k)=>{
+      const a0=-Math.PI/2+k/fs.length*2*Math.PI, a1=-Math.PI/2+(k+1)/fs.length*2*Math.PI;
+      const pa=document.createElementNS(NS,'path');
+      pa.setAttribute('d',`M0 0L${r*Math.cos(a0)} ${r*Math.sin(a0)}A${r} ${r} 0 ${a1-a0>Math.PI?1:0} 1 ${r*Math.cos(a1)} ${r*Math.sin(a1)}Z`);
+      pa.setAttribute('fill',fieldColor(f));pa.setAttribute('stroke','#0e1014');pa.setAttribute('stroke-width','.8');g.append(pa);
+    });
+    const tx=document.createElementNS(NS,'text');tx.setAttribute('text-anchor','middle');tx.setAttribute('y',r+(isHub(n.id)?23:17));if(isHub(n.id)){tx.style.fill='#f5c451';tx.style.fontWeight='600'}
+    tx.textContent=[(authorsOf(n.p)[0]||{}).last||'',yearOf(n.p)].filter(Boolean).join(' ')||(n.p.title||'').slice(0,14);
+    g.append(tx);gN.append(g);return g;
+  });
+  const place=()=>{
+    edges.forEach(([i,j],k)=>{const l=lines[k];l.setAttribute('x1',nodes[i].x);l.setAttribute('y1',nodes[i].y);l.setAttribute('x2',nodes[j].x);l.setAttribute('y2',nodes[j].y)});
+    nodes.forEach((n,i)=>gs[i].setAttribute('transform',`translate(${n.x},${n.y})`));
+  };
+  place();
+  box.querySelector('svg')?.remove(); box.querySelector('.gempty')?.remove();
+  box.prepend(svg);
+  if(!edges.length){const e=document.createElement('div');e.className='gempty';e.style.alignItems='flex-start';e.style.paddingTop='8px';e.textContent='관련 논문을 연결하면 여기에 선이 그려져요';box.append(e)}
+  const tip=$('#gtip');
+  const hl=i=>{
+    box.classList.add('hl');
+    const on=new Set([i]);
+    edges.forEach(([a,b],k)=>{const hit=a===i||b===i;lines[k].classList.toggle('on',hit);if(hit){on.add(a);on.add(b)}});
+    gs.forEach((g,k)=>g.classList.toggle('on',on.has(k)));
+    const n=nodes[i];
+    tip.innerHTML=n.kind==='ins'?`${esc(insTitle(n.ins))}<div class="m">인사이트 · ${esc((IT[n.ins.type]||IT.idea).label)} · ${esc((IS[n.ins.status]||IS.thinking).label)}</div>`:`${esc(n.p.title||'(제목 없음)')}<div class="m">${esc([shortAuthors(n.p),n.p.journal,yearOf(n.p)].filter(Boolean).join(' · '))} · 연결 ${relOf(n.id)}개</div>`;
+    const nx=n.x*V.k+V.x, ny=n.y*V.k+V.y;
+    const tx=Math.min(nx+16,VW-270), ty=ny>VH-120?ny-20-tip.offsetHeight:ny+18;
+    tip.style.left=Math.max(6,tx)+'px';tip.style.top=ty+'px';tip.classList.add('show');
+  };
+  const unhl=()=>{box.classList.remove('hl');lines.forEach(l=>l.classList.remove('on'));gs.forEach(g=>g.classList.remove('on','grp'));tip.classList.remove('show')};
+  // 길게 누르면: 그 점과 선으로 이어진 묶음 전체를 골라 한 번에 옮김
+  const adj=nodes.map(()=>[]); edges.forEach(([a,b])=>{adj[a].push(b);adj[b].push(a)});
+  const comp=i=>{const seen=new Set([i]),st=[i];while(st.length){const x=st.pop();for(const y of adj[x])if(!seen.has(y)){seen.add(y);st.push(y)}}return [...seen]};
+  const hlGroup=grp=>{const on=new Set(grp);box.classList.add('hl');tip.classList.remove('show');
+    edges.forEach(([a,b],k)=>lines[k].classList.toggle('on',on.has(a)&&on.has(b)));
+    gs.forEach((g,k)=>{g.classList.toggle('on',on.has(k));g.classList.toggle('grp',on.has(k))})};
+  svg.addEventListener('contextmenu',ev=>ev.preventDefault());
+  gs.forEach((g,i)=>{
+    let drag=null;
+    g.addEventListener('pointerenter',()=>{if(!drag)hl(i)});
+    g.addEventListener('pointerleave',()=>{if(!drag)unhl()});
+    g.addEventListener('pointerdown',ev=>{
+      ev.preventDefault();ev.stopPropagation();g.setPointerCapture(ev.pointerId);
+      const r=svg.getBoundingClientRect(),sx=VW/r.width/V.k,sy=VH/r.height/V.k;
+      drag={x0:ev.clientX,y0:ev.clientY,nx:nodes[i].x,ny:nodes[i].y,sx,sy,moved:false,grp:null};hl(i);
+      const d=drag;
+      d.timer=setTimeout(()=>{if(drag!==d||d.moved)return;
+        d.grp=comp(i);d.start=d.grp.map(k=>[nodes[k].x,nodes[k].y]);hlGroup(d.grp);
+        try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}
+        toast(`묶음 ${d.grp.length}개를 골랐어요 · 끌어서 한꺼번에 옮기세요`)},LONGPRESS);
+    });
+    g.addEventListener('pointermove',ev=>{
+      if(!drag) return;
+      const dx=(ev.clientX-drag.x0)*drag.sx,dy=(ev.clientY-drag.y0)*drag.sy;
+      if(Math.abs(dx)+Math.abs(dy)>4){drag.moved=true;clearTimeout(drag.timer)}
+      if(!drag.moved) return;
+      if(drag.grp){   // 묶음 이동
+        drag.grp.forEach((k,j)=>{nodes[k].x=drag.start[j][0]+dx;nodes[k].y=drag.start[j][1]+dy;S.gpos[nodes[k].id]={x:nodes[k].x/W,y:nodes[k].y/H}});
+        place();return;
+      }
+      nodes[i].x=drag.nx+dx;nodes[i].y=drag.ny+dy;   // 벽 없음: 지도 밖으로도 옮길 수 있음
+      S.gpos[nodes[i].id]={x:nodes[i].x/W,y:nodes[i].y/H};place();hl(i);
+    });
+    const end=ev=>{
+      if(!drag) return;clearTimeout(drag.timer);const moved=drag.moved,grp=drag.grp;drag=null;
+      if(moved) saveLayout();
+      if(grp){unhl();return}   // 길게 누른 뒤 놓기만 하면 상세를 열지 않음
+      if(!moved){unhl();nodes[i].kind==='ins'?goIns(nodes[i].ins.id):openDetail(nodes[i].id)} else if(ev.pointerType!=='mouse') unhl();
+    };
+    g.addEventListener('pointerup',end);
+    g.addEventListener('pointercancel',()=>{if(drag)clearTimeout(drag.timer);drag=null;unhl()});
+  });
+  // ---- 확대·축소·이동 ----
+  const texts=[...gN.querySelectorAll('text')];
+  const KMIN=fitK*.12, KMAX=8;
+  const applyView=()=>{
+    V.k=Math.max(KMIN,Math.min(KMAX,V.k));
+    gW.setAttribute('transform',`translate(${V.x} ${V.y}) scale(${V.k})`);
+    const fsz=11*Math.pow(V.k,.3)/V.k;   // 확대해도 글자가 지나치게 커지지 않게
+    texts.forEach(t=>{t.style.fontSize=fsz+'px';t.style.strokeWidth=(3*fsz/11)+'px'});
+    box.classList.toggle('nolabel',nodes.length>40&&V.k/fitK<1.6);
+    const z=$('#gZoom'); if(z) z.textContent=Math.round(V.k/fitK*100)+'%';
+  };
+  const zoomAt=(f,cx,cy)=>{const k0=V.k;V.k=Math.max(KMIN,Math.min(KMAX,V.k*f));const r=V.k/k0;V.x=cx-(cx-V.x)*r;V.y=cy-(cy-V.y)*r;applyView()};
+  // 전체 보기: 점이 모두 기본 영역 안이면 기본 화면, 밖으로 나간 점이 있으면 전부 보이게 축소
+  const fitAll=()=>{
+    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;nodes.forEach(n=>{x0=Math.min(x0,n.x);y0=Math.min(y0,n.y);x1=Math.max(x1,n.x);y1=Math.max(y1,n.y)});
+    if(!nodes.length||(x0>=M-20&&y0>=M-36&&x1<=W-M+20&&y1<=H-M+20)){V.k=fitK;V.x=0;V.y=0;applyView();return}
+    const pad=50;V.k=Math.min(fitK,(VW-pad*2)/Math.max(x1-x0,1),(VH-pad*2)/Math.max(y1-y0,1));
+    V.x=VW/2-(x0+x1)/2*V.k;V.y=VH/2-(y0+y1)/2*V.k;applyView();
+  };
+  const fitTo=list=>{
+    if(!list.length){fitAll();return}
+    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;list.forEach(n=>{x0=Math.min(x0,n.x);y0=Math.min(y0,n.y);x1=Math.max(x1,n.x);y1=Math.max(y1,n.y)});
+    const pad=70;
+    V.k=Math.min((VW-pad*2)/Math.max(x1-x0,1),(VH-pad*2)/Math.max(y1-y0,1),fitK*2.2);
+    V.k=Math.max(V.k,fitK*.8);
+    V.x=VW/2-(x0+x1)/2*V.k;V.y=VH/2-(y0+y1)/2*V.k;applyView();
+  };
+  const toSvg=(ev,r)=>[(ev.clientX-r.left)*VW/r.width,(ev.clientY-r.top)*VH/r.height];
+  svg.addEventListener('wheel',ev=>{ev.preventDefault();const r=svg.getBoundingClientRect();const [cx,cy]=toSvg(ev,r);zoomAt(Math.exp(-ev.deltaY*(ev.deltaMode?.05:.0018)),cx,cy)},{passive:false});
+  const pts=new Map();let pan=null,pinch=null;
+  svg.addEventListener('pointerdown',ev=>{
+    if(ev.target.closest&&ev.target.closest('.node')) return;
+    svg.setPointerCapture(ev.pointerId);pts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+    if(pts.size===1){pan={x0:ev.clientX,y0:ev.clientY,vx:V.x,vy:V.y};box.classList.add('panning')}
+    else if(pts.size===2){const [a,b]=[...pts.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,k:V.k,vx:V.x,vy:V.y,mx:(a.x+b.x)/2,my:(a.y+b.y)/2};pan=null}
+  });
+  svg.addEventListener('pointermove',ev=>{
+    if(!pts.has(ev.pointerId)) return;
+    pts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+    const r=svg.getBoundingClientRect(),s=VW/r.width;
+    if(pinch&&pts.size>=2){
+      const [a,b]=[...pts.values()],d=Math.hypot(a.x-b.x,a.y-b.y),mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+      const k=Math.max(KMIN,Math.min(KMAX,pinch.k*d/pinch.d)),cx=(pinch.mx-r.left)*s,cy=(pinch.my-r.top)*s;
+      V.k=k;V.x=cx-(cx-pinch.vx)*(k/pinch.k)+(mx-pinch.mx)*s;V.y=cy-(cy-pinch.vy)*(k/pinch.k)+(my-pinch.my)*s;applyView();
+    }else if(pan){V.x=pan.vx+(ev.clientX-pan.x0)*s;V.y=pan.vy+(ev.clientY-pan.y0)*s;applyView()}
+  });
+  const upP=ev=>{pts.delete(ev.pointerId);if(pts.size<2)pinch=null;if(!pts.size){pan=null;box.classList.remove('panning')}};
+  svg.addEventListener('pointerup',upP);svg.addEventListener('pointercancel',upP);
+  // ---- 키워드로 찾기 ----
+  const kwMatch=()=>{
+    const q=S.gk.trim().toLowerCase(); if(!q) return null;
+    const set=new Set();
+    for(const n of nodes){ if(n.kind==='ins') continue; const p=n.p;
+      const hit=S.gkExact?[...arr(p.keywords),...arr(p.fields)].some(k=>k.toLowerCase()===q)
+        :[p.title,arr(p.keywords).join(' | '),arr(p.fields).join(' | '),arr(p.authors).join(' | '),p.journal,'#'+noStr(p)].join(' | ').toLowerCase().includes(q);
+      if(hit) set.add(n.id)}
+    return set;
+  };
+  const applyKw=fit=>{
+    const m=kwMatch();
+    box.classList.toggle('kw',!!m);
+    gs.forEach((g,i)=>g.classList.toggle('match',!!m&&m.has(nodes[i].id)));
+    lines.forEach((l,k)=>{const [a,b]=edges[k];l.classList.toggle('match',!!m&&m.has(nodes[a].id)&&m.has(nodes[b].id))});
+    const info=$('#gMatch');
+    if(info) info.innerHTML=m?`<b style="color:var(--text)">${m.size}</b>편 일치${m.size?` · <a href="#" id="gToList">목록으로 보기</a>`:''} · <a href="#" id="gClear">지우기</a>`:'';
+    const tl=$('#gToList'); if(tl) tl.onclick=e=>{e.preventDefault();S.q=S.gk;S.field='';S.status='';S.acc='';S.noThought=false;S.limit=PAGE;setView('cards')};
+    const gc=$('#gClear'); if(gc) gc.onclick=e=>{e.preventDefault();S.gk='';S.gkExact=false;const i=$('#gkq');if(i)i.value='';document.querySelectorAll('#gChips .kchip').forEach(c=>c.classList.remove('on'));applyKw(false);fitAll()};
+    if(fit) m&&m.size?fitTo(nodes.filter(n=>m.has(n.id))):(!m&&fitAll());
+  };
+  S._gApi={applyKw};
+  applyView();applyKw(false);
+  if(newView){const m=kwMatch();m&&m.size?fitTo(nodes.filter(n=>m.has(n.id))):fitAll()}
+  $('#gZin').onclick=()=>zoomAt(1.35,VW/2,VH/2);
+  $('#gZout').onclick=()=>zoomAt(1/1.35,VW/2,VH/2);
+  $('#gFit').onclick=()=>{const m=kwMatch();m&&m.size?fitTo(nodes.filter(n=>m.has(n.id))):fitAll()};
+  // legend
+  const fs=Object.keys(allFields()).sort();
+  $('#gLegend').innerHTML=fs.map(f=>`<span><i style="background:${fieldColor(f)};border-radius:50%"></i>${esc(f)}</span>`).join('')+
+    `<span style="margin-left:auto;color:var(--faint)">점 색 = 분야(여러 개면 나눠 칠함) · 바깥 테두리 = 읽은 상태 · 크기 = 중요도 · ${isFinite(relInfo().thr)?`점선 고리 = 허브(연결 ${relInfo().thr}개 이상)`:'점선 고리 = 허브(연결이 쌓이면 표시)'}${showIns?' · ◆ 인사이트':''}</span>`;
+}
+
+/* ---- relation index: number of direct links; hubs = well-connected papers ---- */
+function relInfo(){
+  if(S._rel) return S._rel;
+  const deg={}; for(const p of S.papers) deg[p.id]=0;
+  for(const [a,b] of graphEdges()){deg[a]++;deg[b]++}
+  const ds=Object.values(deg).filter(d=>d>0).sort((a,b)=>b-a);
+  const top=ds.length?ds[Math.max(0,Math.ceil(ds.length*.2)-1)]:Infinity;
+  const thr=Math.max(3,top);
+  const hub=new Set(Object.keys(deg).filter(k=>deg[k]>=thr));
+  return S._rel={deg,hub,thr};
+}
+const relOf=id=>relInfo().deg[id]||0;
+const isHub=id=>relInfo().hub.has(id);
+function relHTML(id,compact){
+  const d=relOf(id);
+  if(isHub(id)) return `<span class="rel hub" title="관계성 지수 ${d} · 연결이 많은 허브 논문">◆ 허브 · 연결 ${d}</span>`;
+  return d?`<span class="rel" title="관계성 지수 ${d}">연결 ${d}</span>`:(compact?'':'<span class="rel none">연결 없음</span>');
+}
+/* ---- crossing reduction: local search after the force layout ---- */
+function untangle(nodes,edges,R,W,H,M,L,thorough){
+  const n=nodes.length; if(n<3) return;
+  const cross=(p1,p2,p3,p4)=>{
+    const d=(a,b,c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
+    const d1=d(p3,p4,p1),d2=d(p3,p4,p2),d3=d(p1,p2,p3),d4=d(p1,p2,p4);
+    return ((d1>0&&d2<0)||(d1<0&&d2>0))&&((d3>0&&d4<0)||(d3<0&&d4>0));
+  };
+  const segDist=(p,a,b)=>{const vx=b.x-a.x,vy=b.y-a.y,l2=vx*vx+vy*vy||1;let t=((p.x-a.x)*vx+(p.y-a.y)*vy)/l2;t=Math.max(0,Math.min(1,t));return Math.hypot(p.x-a.x-t*vx,p.y-a.y-t*vy)};
+  const minGap=L*.55;
+  // cost terms that involve node i (edge crossings, edge-through-node, crowding, edge length)
+  const costOf=i=>{
+    let c=0; const me=nodes[i];
+    for(let k=0;k<edges.length;k++){
+      const [a,b]=edges[k]; const inc=a===i||b===i;
+      if(inc){
+        for(let m=0;m<edges.length;m++){ if(m===k) continue; const [u,v]=edges[m]; if(u===a||u===b||v===a||v===b) continue;
+          if(cross(nodes[a],nodes[b],nodes[u],nodes[v])) c+=100; }
+        for(let j=0;j<n;j++){ if(j===a||j===b) continue; if(segDist(nodes[j],nodes[a],nodes[b])<R[j]+16) c+=40; }
+        const len=Math.hypot(nodes[a].x-nodes[b].x,nodes[a].y-nodes[b].y); c+=Math.abs(len-L)*.04;
+      } else if(segDist(me,nodes[a],nodes[b])<R[i]+16) c+=40;
+    }
+    for(let j=0;j<n;j++){ if(j===i) continue; const d=Math.hypot(me.x-nodes[j].x,me.y-nodes[j].y); if(d<minGap) c+=(minGap-d)*1.2; }
+    return c;
+  };
+  const totalCross=()=>{let c=0;for(let k=0;k<edges.length;k++)for(let m=k+1;m<edges.length;m++){const [a,b]=edges[k],[u,v]=edges[m];if(u===a||u===b||v===a||v===b)continue;if(cross(nodes[a],nodes[b],nodes[u],nodes[v]))c++}return c};
+  const budget=Math.min(thorough?4000:900, Math.floor(4e6/Math.max(1,edges.length*edges.length+n)));
+  let step=Math.min(W,H)*.45;
+  for(let it=0;it<budget;it++){
+    if(it%40===0 && edges.length && totalCross()===0 && it>budget*.3) break;
+    const i=Math.floor(Math.random()*n), me=nodes[i], ox=me.x, oy=me.y;
+    const before=costOf(i);
+    if(Math.random()<.25){me.x=M+Math.random()*(W-2*M);me.y=M-16+Math.random()*(H-2*M+16)}
+    else{me.x=Math.max(M,Math.min(W-M,ox+(Math.random()*2-1)*step));me.y=Math.max(M-16,Math.min(H-M,oy+(Math.random()*2-1)*step))}
+    if(costOf(i)>=before){me.x=ox;me.y=oy}
+    step=Math.max(8,step*.997);
+  }
+}
+let _gResize;
+window.addEventListener('resize',()=>{clearTimeout(_gResize);_gResize=setTimeout(()=>{if(S.view==='home'&&S.loaded)drawGraph()},200)});
+function renderFilters(){
+  const fields=Object.keys(allFields()).sort();
+  return `<div class="filters">
+    <div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" placeholder="제목, 저자, 키워드, 내용으로 검색" value="${esc(S.q)}"></div>
+    <select class="f" id="fField"><option value="">모든 분야</option>${fields.map(f=>`<option ${S.field===f?'selected':''}>${esc(f)}</option>`).join('')}</select>
+    ${S.view!=='kanban'?`<select class="f" id="fStatus"><option value="">모든 상태</option>${STATUSES.map(s=>`<option value="${s.k}" ${S.status===s.k?'selected':''}>${s.label}</option>`).join('')}</select>`:''}
+    <select class="f" id="fRating"><option value="0">모든 중요도</option>${[5,4,3,2,1].map(n=>`<option value="${n}" ${S.minRating===n?'selected':''}>${'★'.repeat(n)}${n<5?' 이상':''}</option>`).join('')}</select>
+    <select class="f" id="fAcc"><option value="">무료·유료 전체</option>${ACC_GROUPS.map(([k,l])=>`<option value="${k}" ${S.acc===k?'selected':''}>${l}</option>`).join('')}</select>
+    ${S.noThought?`<button class="btn on" id="fNoThought" title="이 조건 풀기">내 생각 비어 있는 다 읽은 논문 ✕</button>`:''}
+    ${S.view==='cards'?`<select class="f" id="fSort">${[['no','번호 순'],['addedAt','추가한 순'],['pubDate','출판일 순'],['rating','중요도 순'],['links','관계성 순'],['title','제목 순'],['readAt','다 읽은 날짜 순']].map(([k,l])=>`<option value="${k}" ${S.sort.key===k?'selected':''}>${l}</option>`).join('')}</select>`:''}
+  </div>`;
+}
+function renderSelBar(){
+  if(!S.selMode) return '';
+  return `<div class="selbar"><span><b>${S.sel.size}</b>편 선택됨 · 논문을 눌러 고르세요</span><span class="spacer" style="flex:1"></span>
+    <button class="btn ghost" id="selAll">보이는 논문 모두 선택</button>
+    <button class="btn ghost" id="selNone">선택 해제</button>
+    <button class="btn primary" id="selExport" ${S.sel.size?'':'disabled'}>참고문헌 추출</button>
+    <button class="btn ghost" id="selExit">닫기</button></div>`;
+}
+function emptyFiltered(){return `<div class="panel empty"><h3>조건에 맞는 논문이 없어요</h3><div>검색어나 필터를 바꿔 보세요.</div></div>`}
+function moreHTML(L){return L.length>S.limit?`<div class="more"><button class="btn" id="moreBtn">더 보기 (${L.length-S.limit}편 남음)</button></div>`:''}
+function renderCards(){
+  const L=filtered();
+  if(!L.length) return S.papers.length?emptyFiltered():renderHome();
+  return `<div class="count-note">${L.length}편${L.length>S.limit?` · ${S.limit}편까지 표시`:''}</div><div class="grid">`+L.slice(0,S.limit).map(p=>{
+    const meta=[shortAuthors(p),p.journal,yearOf(p)].filter(Boolean).map(esc).join(' · ');
+    const sel=S.sel.has(p.id);
+    return `<div class="card ${S.selMode?'selmode':''} ${sel?'sel':''} ${isHub(p.id)?'hubc':''}" data-id="${esc(p.id)}">
+      ${S.selMode?`<span class="ck ${sel?'on':''}"></span>`:''}
+      <div class="t">${esc(p.title||'(제목 없음)')}</div>
+      ${meta||noStr(p)?`<div class="m">${noHTML(p)}${meta}</div>`:''}
+      ${arr(p.fields).length||ACCESS[p.access]?`<div class="row">${arr(p.fields).map(tagHTML).join('')}${accHTML(p)}</div>`:''}
+      ${p.interesting?`<div class="hl">${esc(p.interesting)}</div>`:''}
+      ${arr(p.keywords).length?`<div class="row">${arr(p.keywords).slice(0,5).map(k=>`<span class="kw">${esc(k)}</span>`).join('')}</div>`:''}
+      <div class="foot">${statusHTML(p.status)}<span style="display:flex;gap:10px;align-items:center">${insOfPaper(p.id).length?`<span class="inscnt" title="이 논문에서 나온 인사이트">◆ ${insOfPaper(p.id).length}</span>`:''}${relHTML(p.id,true)}${starsHTML(p.rating)}</span></div>
+    </div>`;
+  }).join('')+`</div>`+moreHTML(L);
+}
+function renderTable(){
+  const L=filtered();
+  if(!L.length) return S.papers.length?emptyFiltered():renderHome();
+  const cols=[['no','번호'],['title','제목'],['fields','분야'],['status','상태'],['access','무료/유료'],['rating','중요도'],['links','관계성'],['ins','인사이트'],['authors','저자'],['journal','저널'],['pubDate','출판'],['addedAt','추가일'],['readAt','다 읽은 날']];
+  const arrow=k=>S.sort.key===k?`<span class="arr">${S.sort.dir==='asc'?'↑':'↓'}</span>`:'';
+  let h=`<div class="count-note">${L.length}편 · 열 이름을 누르면 정렬돼요</div><div class="tbl-wrap"><table><thead><tr>${S.selMode?'<th style="width:36px"></th>':''}${cols.map(([k,l])=>`<th data-sort="${k}">${l}${arrow(k)}</th>`).join('')}</tr></thead><tbody>`;
+  for(const p of L.slice(0,S.limit)){
+    const sel=S.sel.has(p.id);
+    h+=`<tr data-id="${esc(p.id)}" class="${sel?'sel':''}">${S.selMode?`<td><span class="ck ${sel?'on':''}"></span></td>`:''}
+      <td class="nowrap">${noHTML(p)}</td>
+      <td class="title">${esc(p.title||'(제목 없음)')}${arr(p.keywords).length?`<div class="m">${arr(p.keywords).slice(0,4).map(esc).join(', ')}</div>`:''}</td>
+      <td><div style="display:flex;gap:4px;flex-wrap:wrap">${arr(p.fields).map(tagHTML).join('')}</div></td>
+      <td class="nowrap">${statusHTML(p.status)}</td>
+      <td class="nowrap">${accHTML(p)||'<span class="rel none">미확인</span>'}</td>
+      <td class="nowrap">${starsHTML(p.rating)}</td>
+      <td class="nowrap">${relHTML(p.id,false)}</td>
+      <td class="nowrap">${insOfPaper(p.id).length?`<span class="inscnt">◆ ${insOfPaper(p.id).length}</span>`:''}</td>
+      <td class="nowrap">${esc(shortAuthors(p))}</td>
+      <td>${esc(p.journal||'')}</td>
+      <td class="nowrap">${esc(p.pubDate||'')}</td>
+      <td class="nowrap m">${esc(p.addedAt||'')}</td>
+      <td class="nowrap m">${esc(p.readAt||'')}</td></tr>`;
+  }
+  return h+`</tbody></table></div>`+moreHTML(L);
+}
+function renderKanban(){
+  const L=filtered();
+  let h=`<div class="count-note">카드를 끌어서 다른 칸에 놓으면 상태가 바뀌어요. 폰에서는 카드를 열어 상태를 바꾸세요.</div><div class="kanban">`;
+  for(const s of STATUSES){
+    const items=L.filter(p=>(p.status||'plan')===s.k);
+    h+=`<div class="col" data-col="${s.k}"><div class="col-h">${statusHTML(s.k)}<span class="c">${items.length}</span></div>`;
+    h+=items.length?items.slice(0,S.klimit).map(p=>{
+      const sel=S.sel.has(p.id);
+      return `<div class="kcard" draggable="${!S.selMode}" data-id="${esc(p.id)}" style="${sel?'border-color:var(--accent)':''}">
+        <div style="display:flex;gap:8px;align-items:flex-start">${S.selMode?`<span class="ck ${sel?'on':''}"></span>`:''}<div class="t">${esc(p.title||'(제목 없음)')}</div></div>
+        <div class="m">${noHTML(p)}${[shortAuthors(p),yearOf(p)].filter(Boolean).map(esc).join(' · ')}</div>
+        ${arr(p.fields).length?`<div style="display:flex;gap:4px;flex-wrap:wrap">${arr(p.fields).map(tagHTML).join('')}</div>`:''}
+        ${+p.rating?`<div>${starsHTML(p.rating)}</div>`:''}
+      </div>`;}).join('')+(items.length>S.klimit?`<button class="btn ghost kmore" style="justify-content:center">+ ${items.length-S.klimit}편 더 보기</button>`:''):`<div class="none">없음</div>`;
+    h+=`</div>`;
+  }
+  return h+`</div>`;
+}
+
+/* ---------- main bindings ---------- */
+function bindMain(){
+  const main=$('#main');
+  main.querySelectorAll('[data-gi]').forEach(el=>el.onclick=()=>goIns(el.dataset.gi));
+  const hg=$('#hGoIns'); if(hg) hg.onclick=()=>setView('ins-'+S.iview);
+  const gi=$('#gIns'); if(gi) gi.onchange=()=>{S.gShowIns=gi.checked;drawGraph()};
+  const gr=$('#gRelayout'); if(gr) gr.onclick=()=>{S._relayout=true;S.gview=null;drawGraph();toast('배치를 다시 계산했어요')};
+  const reset=()=>{S.limit=PAGE;S.klimit=KPAGE};
+  main.querySelectorAll('[data-go]').forEach(el=>el.onclick=()=>{S.status=el.dataset.st;S.field='';S.noThought=false;reset();setView(el.dataset.go)});
+  main.querySelectorAll('.bar').forEach(el=>el.onclick=()=>{S.field=el.dataset.field;S.status='';S.noThought=false;reset();setView('cards')});
+  const nd=$('#nudge'); if(nd) nd.onclick=()=>{S.noThought=true;S.status='';S.field='';S.acc='';reset();setView('cards')};
+  const q=$('#q'); if(q){q.oninput=()=>{S.q=q.value;reset();clearTimeout(bindMain._t);bindMain._t=setTimeout(()=>{const pos=q.selectionStart;render();const n=$('#q');n.focus();n.setSelectionRange(pos,pos)},180)}}
+  const ff=$('#fField'); if(ff) ff.onchange=()=>{S.field=ff.value;reset();render()};
+  const fs=$('#fStatus'); if(fs) fs.onchange=()=>{S.status=fs.value;reset();render()};
+  const fr=$('#fRating'); if(fr) fr.onchange=()=>{S.minRating=+fr.value;reset();render()};
+  const fa=$('#fAcc'); if(fa) fa.onchange=()=>{S.acc=fa.value;reset();render()};
+  const fn=$('#fNoThought'); if(fn) fn.onclick=()=>{S.noThought=false;reset();render()};
+  const so=$('#fSort'); if(so) so.onchange=()=>{S.sort={key:so.value,dir:so.value==='title'?'asc':'desc'};render()};
+  const mb=$('#moreBtn'); if(mb) mb.onclick=()=>{S.limit+=PAGE;render()};
+  main.querySelectorAll('.kmore').forEach(b=>b.onclick=ev=>{ev.stopPropagation();S.klimit+=KPAGE;render()});
+  // 연결 지도: 키워드로 찾기
+  const gk=$('#gkq'); if(gk) gk.oninput=()=>{S.gk=gk.value;S.gkExact=false;main.querySelectorAll('#gChips .kchip').forEach(c=>c.classList.remove('on'));clearTimeout(bindMain._g);bindMain._g=setTimeout(()=>S._gApi&&S._gApi.applyKw(true),220)};
+  const km=$('#gKwMore'); if(km) km.onclick=()=>{S.gkMore=!S.gkMore;render()};
+  main.querySelectorAll('#gChips .kchip[data-kw]').forEach(c=>c.onclick=()=>{
+    const t=c.dataset.kw, off=S.gkExact&&S.gk===t;
+    S.gk=off?'':t;S.gkExact=!off;const i=$('#gkq');if(i)i.value=S.gk;
+    main.querySelectorAll('#gChips .kchip[data-kw]').forEach(x=>x.classList.toggle('on',!off&&x===c));
+    S._gApi&&S._gApi.applyKw(true);
+  });
+  main.querySelectorAll('th[data-sort]').forEach(th=>th.onclick=()=>{const k=th.dataset.sort;S.sort=S.sort.key===k?{key:k,dir:S.sort.dir==='asc'?'desc':'asc'}:{key:k,dir:['title','authors','journal','fields','status'].includes(k)?'asc':'desc'};render()});
+  main.querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>{
+    const id=el.dataset.id;
+    if(S.selMode){S.sel.has(id)?S.sel.delete(id):S.sel.add(id);render();return}
+    openDetail(id);
+  });
+  // selection bar
+  const a=$('#selAll'); if(a) a.onclick=()=>{filtered().forEach(p=>S.sel.add(p.id));render()};
+  const n=$('#selNone'); if(n) n.onclick=()=>{S.sel.clear();render()};
+  const x=$('#selExit'); if(x) x.onclick=()=>{S.selMode=false;S.sel.clear();render()};
+  const e=$('#selExport'); if(e) e.onclick=()=>openCite([...S.sel]);
+  // kanban dnd
+  if(S.view==='kanban' && !S.selMode){
+    main.querySelectorAll('.kcard').forEach(k=>{
+      k.ondragstart=ev=>{ev.dataTransfer.setData('text/plain',k.dataset.id);k.classList.add('drag')};
+      k.ondragend=()=>k.classList.remove('drag');
+    });
+    main.querySelectorAll('.col').forEach(c=>{
+      c.ondragover=ev=>{ev.preventDefault();c.classList.add('over')};
+      c.ondragleave=()=>c.classList.remove('over');
+      c.ondrop=ev=>{ev.preventDefault();c.classList.remove('over');const id=ev.dataTransfer.getData('text/plain');if(id) setStatus(id,c.dataset.col)};
+    });
+  }
+}
+
+/* ================= detail drawer ================= */
+function openDetail(id){S.openId=id;S.openIns=null;renderDetail();$('#drawer').classList.remove('ins');$('#drawer').classList.add('open');$('#scrim').classList.add('open')}
+function closeDetail(){S.openId=null;S.openIns=null;$('#drawer').classList.remove('open','ins');$('#scrim').classList.remove('open')}
+function renderDetail(){
+  const p=S.byId[S.openId], d=$('#drawer');
+  if(!p){closeDetail();return}
+  const meta=[arr(p.authors).join(', '),p.journal,p.pubDate].filter(Boolean);
+  const bib=[p.volume&&`Vol. ${p.volume}`,p.issue&&`No. ${p.issue}`,p.pages&&`pp. ${p.pages}`].filter(Boolean).join(', ');
+  const link=linkOf(p);
+  const rel=arr(p.related).map(r=>S.byId[r]).filter(Boolean);
+  const back=S.papers.filter(q=>q.id!==p.id && arr(q.related).includes(p.id) && !arr(p.related).includes(q.id));
+  let h=`<div class="d-head"><button class="btn ghost" id="dClose" title="닫기">✕</button><span class="spacer" style="flex:1"></span>
+    <button class="btn" id="dCite">참고문헌</button><button class="btn" id="dEdit">편집</button><button class="btn danger" id="dDel">삭제</button></div>
+    <div class="d-body">
+      ${noStr(p)||ptypeLabel(p)?`<div class="d-row">${noHTML(p)}${ptypeLabel(p)?`<span class="ptype" style="margin-left:0">${esc(ptypeLabel(p))}</span>`:''}</div>`:''}
+      <h2>${esc(p.title||'(제목 없음)')}</h2>
+      ${meta.length?`<div class="d-meta">${meta.map(esc).join(' · ')}${bib?`<br>${esc(bib)}`:''}</div>`:''}
+      ${link?`<div class="d-row"><a href="${esc(link)}" target="_blank" rel="noopener">${esc(p.doi?('DOI: '+p.doi):link)} ↗</a></div>`:''}
+      ${ACCESS[p.access]?`<div class="d-row">${accHTML(p,true)}${p.oaUrl?`<a href="${esc(p.oaUrl)}" target="_blank" rel="noopener" style="font-size:13px">무료 본문 열기 ↗</a>`:''}${p.oaCheckedAt?`<span style="color:var(--faint);font-size:11.5px">${esc(p.oaCheckedAt)} 확인</span>`:''}</div>`:''}
+      ${arr(p.fields).length?`<div class="d-row">${arr(p.fields).map(tagHTML).join('')}</div>`:''}
+      ${arr(p.keywords).length?`<div class="d-row">${arr(p.keywords).map(k=>`<span class="kw">${esc(k)}</span>`).join('')}</div>`:''}
+      <div class="quick">
+        <label>상태 <select id="qStatus">${STATUSES.map(s=>`<option value="${s.k}" ${(p.status||'plan')===s.k?'selected':''}>${s.label}</option>`).join('')}</select></label>
+        <label>관계성 ${relHTML(p.id,false)}</label>
+        <label>중요도 <span class="rate" id="qRate">${[1,2,3,4,5].map(n=>`<button data-n="${n}" class="${n<=(+p.rating||0)?'on':''}" title="${n}점">★</button>`).join('')}</span></label>
+      </div>`;
+  let any=false;
+  for(const [k,l,c] of SECTIONS){ if(p[k]){any=true;h+=`<div class="sec"><h4><i style="background:${c}"></i>${l}</h4><p>${esc(p[k])}</p></div>`} }
+  if(!any) h+=`<div class="sec"><p style="color:var(--faint)">아직 정리한 내용이 없어요. 편집을 눌러 문제, 방법, 결과 등을 적어 보세요.</p></div>`;
+  if(rel.length||back.length){
+    h+=`<div class="sec"><h4><i style="background:var(--accent)"></i>관련 논문</h4><div class="links">`;
+    const why=(a,b)=>((a.relatedWhy||{})[b.id])||((b.relatedWhy||{})[a.id])||'';
+    const item=(r,arrow)=>{const w=why(p,r);return `<div class="plink" data-go-id="${esc(r.id)}"><span class="arrow">${arrow}</span><div style="min-width:0"><div>${esc(r.title)}</div>${w?`<div class="why">${esc(w)}</div>`:''}</div><span class="m">${esc([shortAuthors(r),yearOf(r)].filter(Boolean).join(' · '))}</span></div>`};
+    h+=rel.map(r=>item(r,'→')).join('');
+    h+=back.map(r=>item(r,'←')).join('');
+    h+=`</div></div>`;
+  }
+  h+=insSectionForPaper(p);
+  h+=`<div class="dates"><span>추가: ${esc(p.addedAt||'-')}</span><span>다 읽음: ${esc(p.readAt||'-')}</span>${p.pubDate?`<span>출판: ${esc(p.pubDate)}</span>`:''}</div></div>`;
+  d.innerHTML=h;
+  $('#dClose').onclick=closeDetail;
+  $('#dEdit').onclick=()=>openForm(p.id);
+  $('#dDel').onclick=()=>confirmBox(`"${p.title||'이 논문'}"을(를) 삭제할까요?`,'삭제하면 되돌릴 수 없어요. 다른 논문의 관련 논문 연결에서도 빠져요.','삭제',()=>deletePaper(p.id));
+  $('#dCite').onclick=()=>openCite([p.id]);
+  $('#qStatus').onchange=e=>setStatus(p.id,e.target.value);
+  d.querySelectorAll('#qRate button').forEach(b=>b.onclick=()=>{const n=+b.dataset.n;savePatch(p.id,{rating:(+p.rating===n)?0:n})});
+  d.querySelectorAll('[data-go-id]').forEach(el=>el.onclick=()=>{S.openId=el.dataset.goId;renderDetail();d.querySelector('.d-body').scrollTop=0});
+  d.querySelectorAll('[data-gi]').forEach(el=>el.onclick=()=>goIns(el.dataset.gi));
+  {const pa=$('#pAddIns');if(pa)pa.onclick=()=>openInsForm(null,p.id)}
+}
+
+/* ================= form ================= */
+function openForm(id,noDraft){
+  const p=id?S.byId[id]:{status:'plan',rating:0,addedAt:today(),no:nextNo()};
+  const fieldOpts=Object.keys(allFields()), kwOpts=Object.keys(allKeywords());
+  let relSel=new Set(arr(p.related));
+  const fld=(k,l,opt={})=>`<div class="fld ${opt.full?'full':''}"><label for="f_${k}">${l}${opt.hint?` <em>${opt.hint}</em>`:''}</label>${
+    opt.area?`<textarea id="f_${k}" rows="${opt.rows||3}" placeholder="${esc(opt.ph||'')}">${esc(p[k]||'')}</textarea>`
+    :`<input id="f_${k}" ${opt.type?`type="${opt.type}"`:''} ${opt.list?`list="${opt.list}"`:''} placeholder="${esc(opt.ph||'')}" value="${esc(Array.isArray(p[k])?p[k].join(opt.joiner||', '):(p[k]||''))}">`}</div>`;
+  $('#mbox').className='mbox';
+  $('#mbox').innerHTML=`<div class="mh"><h3>${id?'논문 편집':'논문 추가'}</h3><button class="btn ghost" data-x>✕</button></div>
+  <form class="mb" id="pform"><div class="fg">
+    <div class="fsec">기본 정보</div>
+    <div class="fld"><label for="f_no">관리 번호 <em>PC에 저장한 PDF 번호와 맞추세요</em></label><input id="f_no" type="number" min="1" step="1" value="${+p.no||''}" placeholder="${nextNo()}"></div>
+    <div class="fld"><label for="f_pubType">출판 유형 <em>참고문헌 형식에 쓰여요</em></label><select id="f_pubType">${PUBTYPES.map(t=>`<option value="${t.k}" ${ptypeOf(p)===t.k?'selected':''}>${t.label}</option>`).join('')}</select></div>
+    ${fld('title','제목',{full:true,ph:'Attention Is All You Need'})}
+    ${fld('authors','저자',{full:true,hint:'세미콜론(;)으로 구분, "성, 이름" 또는 "이름 성"',ph:'Vaswani, Ashish; Shazeer, Noam',joiner:'; '})}
+    ${fld('journal','게재처',{hint:'저널, 학회·워크숍, arXiv 같은 서버, 책 챕터면 책 제목',ph:'Nature Materials'})}
+    ${fld('pubDate','출판 날짜',{hint:'연도만 써도 돼요',ph:'2024-03 또는 2024'})}
+    ${fld('fields','분야 태그',{hint:'쉼표로 여러 개',ph:'예: 머신러닝, 생물학'})}
+    ${fld('keywords','키워드/방법론',{hint:'쉼표로 구분',ph:'예: Transformer, Self-supervised learning'})}
+    <div class="fld"><label for="f_status">상태</label><select id="f_status">${STATUSES.map(s=>`<option value="${s.k}" ${(p.status||'plan')===s.k?'selected':''}>${s.label}</option>`).join('')}</select></div>
+    <div class="fld"><label for="f_rating">중요도</label><select id="f_rating"><option value="0">없음</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${+p.rating===n?'selected':''}>${'★'.repeat(n)}</option>`).join('')}</select></div>
+    ${fld('link','링크',{ph:'https://arxiv.org/abs/…'})}
+    ${fld('doi','DOI',{ph:'10.1038/s41586-…'})}
+    <div class="fld"><label for="f_access">무료/유료 <em>Claude가 DOI로 확인해 채워요</em></label><select id="f_access"><option value="">미확인</option>${Object.entries(ACCESS).map(([k,a])=>`<option value="${k}" ${p.access===k?'selected':''}>${a.l} · ${a.d}</option>`).join('')}</select></div>
+    ${fld('oaUrl','무료 본문 링크',{ph:'https://…'})}
+
+    <div class="fsec">내용 정리</div>
+    ${fld('problem','문제',{full:true,area:true,ph:'이 논문이 풀려는 문제는?'})}
+    ${fld('method','방법',{full:true,area:true,ph:'어떻게 풀었나?'})}
+    ${fld('result','결과',{full:true,area:true,ph:'무엇을 보였나? 핵심 수치'})}
+    ${fld('interesting','흥미로운 점',{full:true,area:true,ph:'내가 꽂힌 포인트'})}
+    ${fld('limitations','한계점',{full:true,area:true,rows:2})}
+    ${fld('questions','궁금한 점',{full:true,area:true,rows:2,ph:'이해 안 된 부분, 더 찾아볼 것'})}
+    ${fld('memo','메모',{full:true,area:true,ph:'내 연구와의 연결점, 어디서 알게 됐는지 등'})}
+
+    <div class="fsec">관련 논문</div>
+    <div class="fld full"><input id="relQ" placeholder="위키 안의 논문 검색해서 연결하기"><div class="rel-list" id="relList" style="margin-top:6px"></div><div class="hint">연결하면 두 논문 상세 화면에서 서로 클릭해서 이동할 수 있어요.</div></div>
+
+    <div class="fsec">날짜 · 서지 정보 <span style="color:var(--faint);font-weight:400">(참고문헌용, 선택)</span></div>
+    ${fld('addedAt','추가한 날짜',{type:'date'})}
+    ${fld('readAt','다 읽은 날짜',{type:'date',hint:'"다 읽음"으로 바꾸면 자동으로 오늘'})}
+    ${fld('volume','권 (Volume)',{ph:'30'})}
+    ${fld('issue','호 (Issue)',{ph:'4'})}
+    ${fld('publisher','출판사',{hint:'책 챕터일 때',ph:'Elsevier'})}
+    ${fld('pages','페이지',{ph:'1234–1245 또는 e2301234'})}
+  </div>
+  <datalist id="dlFields">${fieldOpts.map(f=>`<option value="${esc(f)}">`).join('')}</datalist>
+  </form>
+  <div class="mf"><button class="btn ghost" data-x>취소</button><button class="btn primary" id="fSave">${id?'저장':'추가'}</button></div>`;
+  openModal();
+  if(!id) setTimeout(()=>$('#f_title').focus(),50);
+  const relQ=$('#relQ'), relList=$('#relList');
+  const drawRel=()=>{
+    const q=relQ.value.trim().toLowerCase();
+    const others=S.papers.filter(x=>x.id!==id && (!q || (x.title||'').toLowerCase().includes(q) || shortAuthors(x).toLowerCase().includes(q)));
+    others.sort((a,b)=>(relSel.has(b.id)-relSel.has(a.id))||(a.title||'').localeCompare(b.title||''));
+    const cap=Math.max(80,relSel.size), rest=others.length-cap;
+    relList.innerHTML=others.length?others.slice(0,cap).map(x=>`<div class="rel-item" data-rid="${esc(x.id)}"><span class="ck ${relSel.has(x.id)?'on':''}"></span><span>${esc(x.title||'(제목 없음)')}</span><span style="margin-left:auto;color:var(--faint);font-size:11.5px;white-space:nowrap">${esc([shortAuthors(x),yearOf(x)].filter(Boolean).join(' · '))}</span></div>`).join('')+(rest>0?`<div class="rel-none">${rest}편 더 있어요. 검색어로 좁혀 보세요.</div>`:''):`<div class="rel-none">${S.papers.length>(id?1:0)?'검색 결과가 없어요':'연결할 다른 논문이 아직 없어요'}</div>`;
+    relList.querySelectorAll('[data-rid]').forEach(el=>el.onclick=()=>{const r=el.dataset.rid;relSel.has(r)?relSel.delete(r):relSel.add(r);drawRel()});
+  };
+  relQ.oninput=drawRel; drawRel();
+  const FKEY='paper:'+(id||'new');
+  armForm('#pform',FKEY,{get:()=>[...relSel],set:a=>{relSel=new Set(arr(a));drawRel()}},()=>openForm(id,true),noDraft);
+  $('#pform').onsubmit=e=>e.preventDefault();
+  let dupOk=false;
+  $('#fSave').onclick=async()=>{
+    const g=k=>$('#f_'+k).value.trim();
+    const title=g('title');
+    if(!title){$('#f_title').focus();toast('제목을 입력해 주세요');return}
+    // 같은 논문을 두 번 넣지 않도록: DOI 또는 제목이 같은 논문이 있으면 한 번 더 확인
+    if(!dupOk){
+      const nd=s=>String(s||'').toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//,'').trim();
+      const nt=s=>String(s||'').toLowerCase().replace(/[^a-z0-9가-힣]+/g,'');
+      const d=S.papers.find(x=>x.id!==id&&((nd(g('doi'))&&nd(x.doi)===nd(g('doi')))||(nt(title).length>8&&nt(x.title)===nt(title))));
+      if(d){dupOk=true;toast(`이미 있는 논문 같아요: #${noStr(d)} ${(d.title||'').slice(0,30)}… 그래도 저장하려면 한 번 더 누르세요`);return}
+    }
+    let no=parseInt(g('no'),10);
+    if(!(no>0)) no=id&&+p.no>0?+p.no:nextNo();
+    const dup=S.papers.find(x=>x.id!==id&&+x.no===no);
+    if(dup){$('#f_no').focus();toast(`#${String(no).padStart(2,'0')}은(는) 이미 "${(dup.title||'').slice(0,24)}"에 쓰이고 있어요`);return}
+    const status=$('#f_status').value;
+    let readAt=g('readAt');
+    if(status==='done' && !readAt) readAt=today();
+    const data={
+      title, authors:g('authors').split(/;|\n/).map(x=>x.trim()).filter(Boolean),
+      journal:g('journal'), pubDate:g('pubDate'),
+      fields:splitList(g('fields')), keywords:splitList(g('keywords')),
+      status, rating:+$('#f_rating').value||0, link:g('link'), doi:g('doi'),
+      problem:g('problem'), method:g('method'), result:g('result'), interesting:g('interesting'),
+      limitations:g('limitations'), questions:g('questions'), memo:g('memo'),
+      related:[...relSel], relatedWhy:Object.fromEntries(Object.entries(p.relatedWhy||{}).filter(([k])=>relSel.has(k))), addedAt:g('addedAt')||today(), readAt,
+      volume:g('volume'), issue:g('issue'), pages:g('pages'), publisher:g('publisher'), no, pubType:$('#f_pubType').value,
+      access:$('#f_access').value, oaUrl:g('oaUrl'), oaCheckedAt:$('#f_access').value!==(p.access||'')?($('#f_access').value?today():''):(p.oaCheckedAt||''),
+    };
+    $('#fSave').disabled=true;
+    const newId=await savePaper(id,data);
+    $('#fSave').disabled=false;
+    if(newId){draftDel(FKEY);closeModal(true);toast(id?'저장했어요':'추가했어요');if(S.openId===newId||!id) openDetail(newId)}
+  };
+  // field datalist for first tag hint
+  $('#f_fields').setAttribute('list','dlFields');
+}
+
+/* ================= cite modal ================= */
+function openCite(ids){
+  const L=ids.map(i=>S.byId[i]).filter(Boolean);
+  const draw=()=>{
+    const seen={};
+    const keys=L.map(p=>{const k=bibKey(p);seen[k]=(seen[k]||0)+1;return k});
+    const cnt={};
+    const keys2=keys.map(k=>seen[k]>1?k+String.fromCharCode(97+(cnt[k]=(cnt[k]??-1)+1)):k);
+    const txt=L.map((p,i)=>cite(p,S.fmt,i+1,keys2[i])).join('\n\n');
+    $('#mbox').className='mbox';
+    $('#mbox').innerHTML=`<div class="mh"><h3>참고문헌 추출 · ${L.length}편</h3><button class="btn ghost" data-x>✕</button></div>
+      <div class="mb"><div class="fmt">${FORMATS.map(f=>`<button class="btn ${S.fmt===f.k?'on':''}" data-fmt="${f.k}">${f.label}</button>`).join('')}</div>
+      <textarea class="out" id="citeOut" spellcheck="false">${esc(txt)}</textarea>
+      <div class="hint">출판 유형(학술지·학회·워크숍·프리프린트)에 따라 형식이 달라져요. 저자는 "성, 이름"으로 적으면 가장 정확해요(한국어 이름은 "홍길동"처럼 붙여 써도 돼요).<br>텍스트라서 기울임·굵게는 빠지고, 저널 이름은 약어로 바꾸지 않아요. 투고할 때는 투고처 규정에 맞게 한 번 확인해 주세요.</div></div>
+      <div class="mf"><button class="btn" id="citeDl">${S.fmt==='bibtex'?'.bib용 텍스트 저장':'텍스트 파일 저장'}</button><button class="btn primary" id="citeCopy">복사</button></div>`;
+    $('#mbox').querySelectorAll('[data-fmt]').forEach(b=>b.onclick=()=>{S.fmt=b.dataset.fmt;draw()});
+    $('#citeCopy').onclick=()=>copyText($('#citeOut').value);
+    $('#citeDl').onclick=()=>saveFile(`references_${S.fmt}_${today()}.txt`,$('#citeOut').value);
+    bindModalClose();
+  };
+  draw(); openModal();
+}
+async function copyText(t){
+  try{await navigator.clipboard.writeText(t);toast('복사했어요')}
+  catch(e){const o=$('#citeOut')||$('#bkOut');if(o){o.focus();o.select()}toast('자동 복사가 막혔어요. 선택된 텍스트를 직접 복사해 주세요')}
+}
+
+/* ================= backup / import ================= */
+const CSV_COLS=[['no','번호'],['pubType','출판 유형'],['title','제목'],['authors','저자'],['journal','저널'],['pubDate','출판 날짜'],['fields','분야'],['keywords','키워드'],['status','상태'],['rating','중요도'],['problem','문제'],['method','방법'],['result','결과'],['interesting','흥미로운 점'],['limitations','한계점'],['questions','궁금한 점'],['memo','메모'],['related','관련 논문'],['link','링크'],['doi','DOI'],['access','무료/유료'],['oaUrl','무료 본문 링크'],['volume','권'],['issue','호'],['pages','페이지'],['publisher','출판사'],['addedAt','추가한 날짜'],['readAt','다 읽은 날짜'],['id','id']];
+function toCSV(){
+  const cell=v=>{v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  const lines=[CSV_COLS.map(c=>c[1]).join(',')];
+  for(const p of S.papers){
+    lines.push(CSV_COLS.map(([k])=>{
+      if(k==='status') return cell((ST[p.status]||ST.plan).label);
+      if(k==='pubType') return cell(PT[ptypeOf(p)].label);
+      if(k==='access') return cell(ACCESS[p.access]?`${ACCESS[p.access].l} (${ACCESS[p.access].d})`:'미확인');
+      if(k==='related') return cell(arr(p.related).map(r=>S.byId[r]?.title).filter(Boolean).join('; '));
+      if(Array.isArray(p[k])) return cell(p[k].join('; '));
+      return cell(p[k]);
+    }).join(','));
+  }
+  return '﻿'+lines.join('\r\n');
+}
+function backupJSON(){
+  return JSON.stringify({app:'paper-wiki',version:1,exportedAt:new Date().toISOString(),papers:S.papers.map(p=>({...p})),insights:S.insights.map(i=>({...i}))},null,2);
+}
+async function saveFile(name,text){
+  if(downloads){
+    try{await downloads.save({filename:name,data:text});toast('저장했어요');return}
+    catch(e){
+      if(e&&e.code==='declined') return;
+      if(e&&e.code==='rate_limited'){toast('잠시 후 다시 시도해 주세요');return}
+    }
+  }
+  // fallback: show text to copy
+  $('#mbox').className='mbox';
+  $('#mbox').innerHTML=`<div class="mh"><h3>${esc(name)}</h3><button class="btn ghost" data-x>✕</button></div>
+    <div class="mb"><p style="margin:0 0 10px;color:var(--muted);font-size:13px">이 화면에서는 파일 저장이 안 돼요. 아래 내용을 복사해서 파일로 저장해 주세요.</p><textarea class="out" id="bkOut" spellcheck="false">${esc(text)}</textarea></div>
+    <div class="mf"><button class="btn primary" id="bkCopy">복사</button></div>`;
+  $('#bkCopy').onclick=()=>copyText($('#bkOut').value);
+  bindModalClose(); openModal();
+}
+function startImport(){$('#fileIn').value='';$('#fileIn').click()}
+$('#fileIn').onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  let list,ilist;
+  try{const j=JSON.parse(await f.text());list=Array.isArray(j)?j:(j.papers||[]);ilist=Array.isArray(j)?[]:(j.insights||[]);if(!Array.isArray(list)||!Array.isArray(ilist)||(!list.length&&!ilist.length)) throw 0}
+  catch(_){toast('논문 위키 백업 파일(JSON)이 아니에요');return}
+  list=list.filter(p=>p&&typeof p==='object'&&p.title);
+  ilist=ilist.filter(i=>i&&typeof i==='object'&&(i.title||i.body));
+  const upd=list.filter(p=>p.id&&S.byId[p.id]).length, add=list.length-upd, iupd=ilist.filter(i=>i.id&&S.insById[i.id]).length;
+  confirmBox(`백업에서 논문 ${list.length}편${ilist.length?`, 인사이트 ${ilist.length}개`:''}를 불러올까요?`,`새 논문 ${add}편${upd?`, 덮어쓸 논문 ${upd}편`:''}${ilist.length?`, 새 인사이트 ${ilist.length-iupd}개${iupd?`, 덮어쓸 인사이트 ${iupd}개`:''}`:''}. 덮어쓴 항목은 되돌릴 수 없어요.`,'불러오기',async()=>{
+    let ok=0,iok=0;
+    for(const i of ilist){const {id,...rest}=i;try{const ref=(id&&/^[A-Za-z0-9_\-.~:@+]{1,200}$/.test(id))?insCol.doc(id):insCol.doc();await ref.set(sanitizeIns(rest));iok++}catch(err){if(handleWriteErr(err)) break}}
+    let nmax=nextNo()-1;
+    const used=new Set(S.papers.map(x=>+x.no).filter(Boolean));
+    for(const p of list){
+      const {id,...rest}=p;
+      const clean=sanitize(rest);
+      const keep=id&&S.byId[id]&&+S.byId[id].no>0?+S.byId[id].no:0;
+      if(!clean.no){clean.no=keep||++nmax}
+      else if(used.has(clean.no)&&!(id&&+S.byId[id]?.no===clean.no)){clean.no=++nmax}
+      used.add(clean.no);nmax=Math.max(nmax,clean.no);
+      try{const ref=(id&&/^[A-Za-z0-9_\-.~:@+]{1,200}$/.test(id))?papersCol.doc(id):papersCol.doc();await ref.set(clean);ok++}catch(err){if(handleWriteErr(err)) break}
+    }
+    toast(`논문 ${ok}편${iok?`, 인사이트 ${iok}개`:''}를 불러왔어요`);
+  });
+};
+function sanitize(p){
+  const o={};
+  const str=['publisher','title','journal','pubDate','link','doi','problem','method','result','interesting','limitations','questions','memo','addedAt','readAt','volume','issue','pages','status'];
+  for(const k of str) o[k]=String(p[k]??'');
+  for(const k of ['authors','fields','keywords','related']) o[k]=arr(p[k]).map(String);
+  o.relatedWhy={};
+  if(p.relatedWhy&&typeof p.relatedWhy==='object') for(const [k,v] of Object.entries(p.relatedWhy)) if(o.related.includes(k)&&typeof v==='string') o.relatedWhy[k]=v;
+  o.rating=Math.max(0,Math.min(5,+p.rating||0));
+  o.no=(Number.isInteger(+p.no)&&+p.no>0)?+p.no:0;
+  o.pubType=PT[p.pubType]?p.pubType:guessType(p);
+  o.access=ACCESS[p.access]?p.access:'';
+  o.oaUrl=/^https?:\/\//i.test(String(p.oaUrl||'').trim())?String(p.oaUrl).trim():'';
+  o.oaCheckedAt=String(p.oaCheckedAt||'');
+  if(!ST[o.status]) o.status='plan';
+  if(!o.addedAt) o.addedAt=today();
+  return o;
+}
+
+/* ================= writes ================= */
+function handleWriteErr(err){
+  const c=err&&err.code;
+  if(c==='quota_exceeded'){toast('저장 공간이 가득 찼어요. 논문 몇 편을 지운 뒤 다시 시도해 주세요');return true}
+  if(c==='invalid_argument'){toast('저장할 권한이 없거나 내용이 너무 커요');return true}
+  if(c==='resource_exhausted'){toast('요청이 너무 많아요. 잠시 후 다시 시도해 주세요');return true}
+  toast('저장하지 못했어요. 잠시 후 다시 시도해 주세요');return false;
+}
+async function withRetry(fn){try{return await fn()}catch(e){if(e&&e.code==='unavailable'){await new Promise(r=>setTimeout(r,500+Math.random()*700));return await fn()}throw e}}
+async function savePaper(id,data){
+  if(!papersCol){toast('저장소에 연결되지 않았어요');return null}
+  const ref=id?papersCol.doc(id):papersCol.doc();
+  try{await withRetry(()=>ref.set(sanitize(data)));return ref.id}
+  catch(e){handleWriteErr(e);return null}
+}
+async function savePatch(id,patch){
+  const p=S.byId[id]; if(!p||!papersCol) return;
+  try{await withRetry(()=>papersCol.doc(id).update(patch))}catch(e){handleWriteErr(e)}
+}
+function setStatus(id,st){
+  const p=S.byId[id]; if(!p||(p.status||'plan')===st) return;
+  const patch={status:st};
+  if(st==='done'&&!p.readAt) patch.readAt=today();
+  savePatch(id,patch);
+  toast(st==='done'&&!String(p.interesting||'').trim()?`"다 읽음"으로 옮겼어요 · 흥미로운 점을 한 줄 적어 두면 질문할 때도 쓰여요`:`"${ST[st].label}"(으)로 옮겼어요`);
+}
+async function deletePaper(id){
+  try{
+    await withRetry(()=>papersCol.doc(id).delete());
+    for(const q of S.papers) if(q.id!==id && arr(q.related).includes(id)) {const {id:_q,...rest}=q;const w={...(q.relatedWhy||{})};delete w[id];await withRetry(()=>papersCol.doc(q.id).set(sanitize({...rest,related:arr(q.related).filter(r=>r!==id),relatedWhy:w})));}
+    for(const x of S.insights) if(arr(x.papers).includes(id)) await withRetry(()=>insCol.doc(x.id).update({papers:arr(x.papers).filter(r=>r!==id)}));
+    S.sel.delete(id); closeDetail(); toast('삭제했어요');
+  }catch(e){handleWriteErr(e)}
+}
+
+/* ================= modal helpers ================= */
+function openModal(){FORM=null;$('#modal').classList.add('open');bindModalClose()}
+// force=true: 저장했거나 '버리고 닫기'를 고른 경우. 그 밖에는 수정 중이면 닫지 않고 묻는다.
+function closeModal(force){
+  if(!force&&FORM&&FORM.dirty){askDiscard();return}
+  FORM=null;$('#modal').classList.remove('open');
+}
+function bindModalClose(){$('#mbox').querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>closeModal())}
+
+/* ---- 편집 중 내용 지키기: 실수로 닫히지 않게 + 이 브라우저에 임시 저장 ---- */
+let FORM=null;
+const DRAFT='pw-draft:', DRAFT_DAYS=14;
+function draftGet(k){try{const d=JSON.parse(localStorage.getItem(DRAFT+k)||'null');if(d&&Date.now()-d.at>DRAFT_DAYS*864e5){localStorage.removeItem(DRAFT+k);return null}return d}catch(e){return null}}
+function draftSet(k,v){try{localStorage.setItem(DRAFT+k,JSON.stringify(v))}catch(e){}}
+function draftDel(k){try{localStorage.removeItem(DRAFT+k)}catch(e){}}
+function armForm(formSel,key,extra,reopen,noDraft){
+  const form=$(formSel); if(!form) return;
+  FORM={key,dirty:false};
+  const skip=new Set(['relQ','fiPq','fiLq']);
+  const snap=()=>{const v={};form.querySelectorAll('input[id],textarea[id],select[id]').forEach(el=>{if(!skip.has(el.id))v[el.id]=el.value});return {at:Date.now(),v,x:extra&&extra.get?extra.get():null}};
+  if(noDraft) draftDel(key);
+  else{
+    const d=draftGet(key);
+    if(d&&d.v){
+      for(const [id,val] of Object.entries(d.v)){const el=form.querySelector('#'+CSS.escape(id));if(el)el.value=val}
+      if(d.x&&extra&&extra.set) extra.set(d.x);
+      FORM.dirty=true;
+      const n=document.createElement('div');n.className='notice';n.style.margin='0 0 14px';
+      n.innerHTML=`저장하지 않았던 수정 내용을 되살렸어요 (${esc(fmtDT(new Date(d.at).toISOString()))}). <a href="#" id="draftDrop">원래대로 되돌리기</a>`;
+      form.prepend(n);
+      $('#draftDrop').onclick=e=>{e.preventDefault();draftDel(key);closeModal(true);reopen&&reopen()};
+    }
+  }
+  let t;
+  const onEdit=()=>{if(!FORM||FORM.key!==key)return;FORM.dirty=true;clearTimeout(t);t=setTimeout(()=>{if(FORM&&FORM.key===key)draftSet(key,snap())},300)};
+  form.addEventListener('input',onEdit);form.addEventListener('change',onEdit);
+  form.addEventListener('click',e=>{if(e.target.closest('.rel-item,.seg button'))setTimeout(onEdit,0)});
+}
+function askDiscard(){
+  if($('#dOvl')) return;
+  const o=document.createElement('div');o.id='dOvl';o.className='dovl';
+  o.innerHTML=`<div class="dbox" role="alertdialog" aria-modal="true" aria-labelledby="dT" aria-describedby="dD">
+    <div class="dic" aria-hidden="true">!</div>
+    <h3 id="dT">저장하지 않은 수정이 있어요</h3>
+    <p id="dD">이대로 닫으면 지금 화면의 수정 내용이 사라져요.</p>
+    <div class="dbtns"><button class="btn danger" id="dDrop">버리고 닫기</button><button class="btn primary" id="dKeep">계속 편집</button></div>
+  </div>`;
+  document.body.append(o);
+  const keep=()=>o.remove();
+  $('#dKeep').onclick=keep;
+  o.addEventListener('mousedown',e=>{if(e.target===o)keep()});
+  $('#dDrop').onclick=()=>{o.remove();if(FORM)draftDel(FORM.key);closeModal(true)};
+  setTimeout(()=>{const k=$('#dKeep');if(k)k.focus()},0);
+}
+function confirmBox(title,body,okLabel,onOk){
+  $('#mbox').className='mbox sm';
+  $('#mbox').innerHTML=`<div class="mh"><h3>${esc(title)}</h3></div><div class="mb" style="color:var(--muted)">${esc(body)}</div>
+    <div class="mf"><button class="btn ghost" data-x>취소</button><button class="btn primary" id="cOk">${esc(okLabel)}</button></div>`;
+  openModal();
+  $('#cOk').onclick=()=>{closeModal();onOk()};
+}
+$('#modal').addEventListener('mousedown',e=>{if(e.target.id==='modal')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const ov=$('#dOvl');if(ov){ov.remove();return}if($('#modal').classList.contains('open'))closeModal();else if(S.openId||S.openIns)closeDetail();else if($('#menu').classList.contains('open'))$('#menu').classList.remove('open')}});
+
+/* ================= header bindings ================= */
+document.querySelectorAll('#tabs button, #itabs button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
+document.querySelectorAll('#space button').forEach(b=>b.onclick=()=>setView(b.dataset.s==='ins'?'ins-'+S.iview:(S.view||'home')));
+$('#brand').onclick=()=>setView('home');
+$('#addBtn').onclick=()=>S.space==='ins'?openInsForm(null):openForm(null);
+$('#selBtn').onclick=()=>{S.selMode=!S.selMode;if(!S.selMode)S.sel.clear();else if(S.view==='home')S.view='cards';setView(S.view);if(S.selMode)toast('참고문헌에 넣을 논문을 골라 주세요')};
+$('#scrim').onclick=closeDetail;
+$('#menuBtn').onclick=e=>{e.stopPropagation();$('#menu').classList.toggle('open')};
+document.addEventListener('click',()=>$('#menu').classList.remove('open'));
+$('#menu').onclick=e=>{
+  const a=e.target.closest('[data-act]'); if(!a) return;
+  $('#menu').classList.remove('open');
+  if(a.dataset.act==='json') saveFile(`paper-wiki-backup_${today()}.json`,backupJSON());
+  if(a.dataset.act==='csv') saveFile(`paper-wiki_${today()}.csv`,toCSV());
+  if(a.dataset.act==='import'){ if(!papersCol){toast('저장소에 연결되지 않았어요');return} startImport(); }
+};
+window.addEventListener('hashchange',()=>{const v=location.hash.slice(1),cur=S.space==='ins'?'ins-'+S.iview:S.view;if(v&&v!==cur)setView(v)});
+
+/* ================= research insights ================= */
+const ITYPES=[{k:'idea',label:'아이디어',color:'#f5c451'},{k:'question',label:'질문',color:'#5cc8e0'},{k:'direction',label:'연구 방향',color:'#5fd394'},{k:'counter',label:'반론·의문',color:'#e98aa0'}];
+const ISTATUS=[{k:'thinking',label:'생각 중',color:'#8b95a7'},{k:'reviewed',label:'검토함',color:'#8ea8ff'},{k:'discuss',label:'교수님께 논의',color:'#b48eff'},{k:'doing',label:'실행',color:'#5fd394'},{k:'hold',label:'보류',color:'#e0707a'}];
+const IT=Object.fromEntries(ITYPES.map(t=>[t.k,t])), IS=Object.fromEntries(ISTATUS.map(s=>[s.k,s]));
+const INS_ACCENT='#f0a868';
+Object.assign(S,{space:'papers',iview:'canvas',insights:[],insById:{},insLoaded:false,openIns:null,iq:'',itype:'',istatus:'',ipaper:'',ipan:null,gShowIns:true});
+let insCol=null;
+const insOfPaper=pid=>S.insights.filter(i=>arr(i.papers).includes(pid));
+const itypeHTML=k=>{const t=IT[k]||IT.idea;return `<span class="itype" style="color:${t.color};border-color:${t.color}55;background:${t.color}1a">${t.label}</span>`};
+const istatusHTML=k=>{const s=IS[k]||IS.thinking;return `<span class="status" style="color:${s.color}">${s.label}</span>`};
+const insTitle=i=>(i.title||'').trim()||(i.body||'').trim().split('\n')[0].slice(0,40)||'(제목 없음)';
+const paperShort=p=>[(authorsOf(p)[0]||{}).last||'',yearOf(p)].filter(Boolean).join(' ')||(p.title||'').slice(0,16);
+function goIns(id){if(S.space!=='ins')setView('ins-'+S.iview);openIns(id)}
+function goPaper(id){if(S.space!=='papers')setView(S.view||'home');openDetail(id)}
+
+function filteredIns(){
+  const q=S.iq.trim().toLowerCase();
+  return S.insights.filter(i=>{
+    if(S.itype&&(i.type||'idea')!==S.itype) return false;
+    if(S.istatus&&(i.status||'thinking')!==S.istatus) return false;
+    if(S.ipaper&&!arr(i.papers).includes(S.ipaper)) return false;
+    if(q){const hay=[i.title,i.body,arr(i.papers).map(id=>S.byId[id]?.title||'').join(' ')].join(' ').toLowerCase();if(!q.split(/\s+/).every(w=>hay.includes(w)))return false}
+    return true;
+  });
+}
+function renderIns(){
+  const N=S.insights.length, act=S.insights.filter(i=>!['hold','doing'].includes(i.status||'thinking')).length;
+  let h=`<div class="hero ins-hero"><div><h1>Research Insights</h1><p>논문을 읽으며 떠오른 생각을 모으고, 서로 잇고, 연구로 키워요.</p></div>
+    ${N?`<div class="meta">인사이트 <b>${N}</b> · 진행 중 <b>${act}</b><br>연결된 논문 <b>${new Set(S.insights.flatMap(i=>arr(i.papers))).size}</b>편</div>`:''}</div>`;
+  if(!N){
+    return h+`<div class="panel empty"><h3>아직 인사이트가 없어요</h3><div>논문을 읽다가 떠오른 아이디어, 질문, 연구 방향, 반론을 적어 보세요.<br>관련 논문을 연결하면 논문 쪽에서도 바로 보여요.</div>
+      <div class="ways"><button class="btn primary" id="iEmptyAdd">첫 인사이트 적기</button></div></div>`;
+  }
+  const papers=[...new Set(S.insights.flatMap(i=>arr(i.papers)))].map(id=>S.byId[id]).filter(Boolean).sort((a,b)=>paperShort(a).localeCompare(paperShort(b)));
+  h+=`<div class="filters">
+    <div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="iq" placeholder="인사이트 검색" value="${esc(S.iq)}"></div>
+    <select class="f" id="iType"><option value="">모든 종류</option>${ITYPES.map(t=>`<option value="${t.k}" ${S.itype===t.k?'selected':''}>${t.label}</option>`).join('')}</select>
+    ${S.iview!=='kanban'?`<select class="f" id="iStatus"><option value="">모든 상태</option>${ISTATUS.map(s=>`<option value="${s.k}" ${S.istatus===s.k?'selected':''}>${s.label}</option>`).join('')}</select>`:''}
+    <select class="f" id="iPaper"><option value="">모든 논문</option>${papers.map(p=>`<option value="${esc(p.id)}" ${S.ipaper===p.id?'selected':''}>${esc(paperShort(p))}</option>`).join('')}</select>
+  </div>`;
+  if(S.iview==='canvas') return h+renderInsCanvas();
+  if(S.iview==='kanban') return h+renderInsKanban();
+  return h+renderInsCards();
+}
+function insCardInner(i,withBody,noStatus){
+  const ps=arr(i.papers).map(id=>S.byId[id]).filter(Boolean);
+  return `<div class="ic-top">${itypeHTML(i.type)}${noStatus?'':istatusHTML(i.status)}</div>
+    <div class="ic-t">${esc(insTitle(i))}</div>
+    ${withBody&&i.body?`<div class="ic-b">${esc(i.body)}</div>`:''}
+    ${ps.length?`<div class="ic-p">${ps.map(p=>`<span class="pchip" data-pid="${esc(p.id)}" title="${esc(p.title)}">${esc(paperShort(p))}</span>`).join('')}</div>`:''}`;
+}
+function renderInsCards(){
+  const L=filteredIns().sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
+  if(!L.length) return emptyFiltered();
+  return `<div class="count-note">${L.length}개 · 최근 수정한 순</div><div class="grid">`+L.map(i=>`<div class="icard flat" data-iid="${esc(i.id)}" style="--tc:${(IT[i.type]||IT.idea).color}">${insCardInner(i,true)}</div>`).join('')+`</div>`;
+}
+function renderInsKanban(){
+  const L=filteredIns();
+  let h=`<div class="count-note">카드를 끌어서 다른 칸에 놓으면 상태가 바뀌어요.</div><div class="kanban ik">`;
+  for(const s of ISTATUS){
+    const items=L.filter(i=>(i.status||'thinking')===s.k).sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
+    h+=`<div class="col" data-icol="${s.k}"><div class="col-h"><span class="status" style="color:${s.color}">${s.label}</span><span class="c">${items.length}</span></div>`;
+    h+=items.length?items.map(i=>`<div class="kcard icard-k" draggable="true" data-iid="${esc(i.id)}" style="border-left:3px solid ${(IT[i.type]||IT.idea).color}">${insCardInner(i,false,true)}</div>`).join(''):`<div class="none">없음</div>`;
+    h+=`</div>`;
+  }
+  return h+`</div>`;
+}
+/* ---- canvas ---- */
+const CW=230;
+function insPositions(){
+  const pos={};let mx=0,k=0;
+  for(const i of S.insights) if(Number.isFinite(i.x)&&Number.isFinite(i.y)){pos[i.id]={x:i.x,y:i.y};mx=Math.max(mx,i.x+CW)}
+  const start=mx?mx+60:40;
+  for(const i of S.insights) if(!pos[i.id]){pos[i.id]={x:start+(k%3)*(CW+50),y:40+Math.floor(k/3)*280};k++}
+  return pos;
+}
+function renderInsCanvas(){
+  const vis=new Set(filteredIns().map(i=>i.id)), pos=insPositions();
+  const cards=S.insights.map(i=>`<div class="icard" data-iid="${esc(i.id)}" style="left:${pos[i.id].x}px;top:${pos[i.id].y}px;--tc:${(IT[i.type]||IT.idea).color};${vis.has(i.id)?'':'opacity:.18'}">${insCardInner(i,true)}</div>`).join('');
+  return `<div class="icanvas" id="icanvas"><div class="iworld" id="iworld"><svg class="iarrows" id="iarrows"><defs><marker id="iah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${INS_ACCENT}"/></marker></defs></svg>${cards}</div>
+    <div class="ctools"><button class="btn" id="cAuto" title="생각의 흐름(출발점 → 이어진 인사이트)에 맞춰 카드 위치를 다시 계산해요">↻ 배치 새로고침</button><button class="btn" id="cFit">전체 보기</button></div>
+    <div class="chint">빈 곳을 끌면 화면 이동 · 카드를 끌면 위치 이동 · 길게 눌렀다 끌면 이어진 카드 묶음 전체 이동 · 카드를 누르면 상세 · 화살표는 생각의 흐름 (출발점 → 이어진 인사이트)</div></div>`;
+}
+function drawArrows(){
+  const svg=$('#iarrows'), world=$('#iworld'); if(!svg||!world) return;
+  const R={}; world.querySelectorAll('.icard').forEach(c=>R[c.dataset.iid]={x:c.offsetLeft,y:c.offsetTop,w:c.offsetWidth,h:c.offsetHeight,o:c.style.opacity});
+  let maxX=0,maxY=0; Object.values(R).forEach(r=>{maxX=Math.max(maxX,r.x+r.w);maxY=Math.max(maxY,r.y+r.h)});
+  svg.setAttribute('width',maxX+400);svg.setAttribute('height',maxY+400);
+  const clip=(r,tx,ty)=>{const cx=r.x+r.w/2,cy=r.y+r.h/2,dx=tx-cx,dy=ty-cy;if(!dx&&!dy)return[cx,cy];const s=Math.min(Math.abs((r.w/2+6)/(dx||1e-9)),Math.abs((r.h/2+6)/(dy||1e-9)));return[cx+dx*s,cy+dy*s]};
+  svg.querySelectorAll('path.ia').forEach(p=>p.remove());
+  for(const i of S.insights) for(const t of arr(i.links)){
+    const a=R[t], b=R[i.id]; if(!a||!b) continue;
+    const [x1,y1]=clip(a,b.x+b.w/2,b.y+b.h/2), [x2,y2]=clip(b,a.x+a.w/2,a.y+a.h/2);
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('class','ia');p.setAttribute('d',`M${x1} ${y1}L${x2} ${y2}`);p.setAttribute('marker-end','url(#iah)');
+    if(a.o||b.o) p.setAttribute('opacity','.2');
+    svg.append(p);
+  }
+}
+function applyPan(){const w=$('#iworld');if(w)w.style.transform=`translate(${S.ipan.x}px,${S.ipan.y}px)`}
+function fitCanvas(){
+  const c=$('#icanvas'),w=$('#iworld'); if(!c||!w) return;
+  const cs=[...w.querySelectorAll('.icard')]; if(!cs.length){S.ipan={x:0,y:0};applyPan();return}
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; cs.forEach(e=>{x0=Math.min(x0,e.offsetLeft);y0=Math.min(y0,e.offsetTop);x1=Math.max(x1,e.offsetLeft+e.offsetWidth);y1=Math.max(y1,e.offsetTop+e.offsetHeight)});
+  const W=c.clientWidth,H=c.clientHeight;
+  S.ipan={x:(x1-x0<W-40)?(W-(x1-x0))/2-x0:30-x0,y:(y1-y0<H-60)?(H-(y1-y0))/2-y0:30-y0};applyPan();
+}
+function bindCanvas(){
+  const c=$('#icanvas'); if(!c) return;
+  if(!S.ipan){S.ipan={x:0,y:0};applyPan();fitCanvas()} else applyPan();
+  drawArrows();
+  $('#cFit').onclick=fitCanvas;
+  $('#cAuto').onclick=()=>confirmBox('카드 위치를 다시 배치할까요?','생각의 흐름(출발점 → 이어진 인사이트)을 따라 왼쪽에서 오른쪽으로 놓고, 연결되지 않은 카드는 아래에 모아요. 지금 위치는 바뀌어요.','다시 배치',autoLayoutIns);
+  let pan=null;
+  c.addEventListener('pointerdown',ev=>{
+    if(ev.target.closest('.icard')||ev.target.closest('.ctools')) return;
+    pan={x0:ev.clientX,y0:ev.clientY,px:S.ipan.x,py:S.ipan.y};c.setPointerCapture(ev.pointerId);c.classList.add('panning');
+  });
+  c.addEventListener('pointermove',ev=>{if(!pan)return;S.ipan={x:pan.px+ev.clientX-pan.x0,y:pan.py+ev.clientY-pan.y0};applyPan()});
+  const endPan=()=>{pan=null;c.classList.remove('panning')};
+  c.addEventListener('pointerup',endPan);c.addEventListener('pointercancel',endPan);
+  // 길게 누르면: 화살표로 이어진 카드 묶음 전체를 골라 한 번에 옮김
+  const cardOf={}; c.querySelectorAll('.icard').forEach(k=>cardOf[k.dataset.iid]=k);
+  const insGroup=id=>{const nb={};S.insights.forEach(i=>nb[i.id]=nb[i.id]||new Set());
+    S.insights.forEach(i=>arr(i.links).forEach(t=>{if(nb[t]&&t!==i.id){nb[i.id].add(t);nb[t].add(i.id)}}));
+    const seen=new Set([id]),st=[id];while(st.length){const x=st.pop();(nb[x]||[]).forEach(y=>{if(!seen.has(y)){seen.add(y);st.push(y)}})}
+    return [...seen].filter(x=>cardOf[x]).map(x=>cardOf[x])};
+  c.addEventListener('contextmenu',ev=>{if(ev.target.closest('.icard'))ev.preventDefault()});
+  c.querySelectorAll('.icard').forEach(card=>{
+    let d=null;
+    card.addEventListener('pointerdown',ev=>{
+      if(ev.target.closest('.pchip')) return;
+      ev.stopPropagation();card.setPointerCapture(ev.pointerId);
+      const dd=d={x0:ev.clientX,y0:ev.clientY,l:card.offsetLeft,t:card.offsetTop,moved:false,grp:null};
+      dd.timer=setTimeout(()=>{if(d!==dd||dd.moved)return;
+        dd.grp=insGroup(card.dataset.iid).map(k=>({k,l:k.offsetLeft,t:k.offsetTop}));
+        dd.grp.forEach(g=>g.k.classList.add('grp'));
+        try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}
+        toast(`카드 ${dd.grp.length}개를 골랐어요 · 끌어서 한꺼번에 옮기세요`)},LONGPRESS);
+    });
+    card.addEventListener('pointermove',ev=>{
+      if(!d)return;const dx=ev.clientX-d.x0,dy=ev.clientY-d.y0;
+      if(Math.abs(dx)+Math.abs(dy)>4&&!d.moved){d.moved=true;clearTimeout(d.timer);(d.grp?d.grp.map(g=>g.k):[card]).forEach(k=>k.classList.add('dragging'))}
+      if(!d.moved)return;
+      if(d.grp) d.grp.forEach(g=>{g.k.style.left=(g.l+dx)+'px';g.k.style.top=(g.t+dy)+'px'});
+      else{card.style.left=(d.l+dx)+'px';card.style.top=(d.t+dy)+'px'}
+      drawArrows();   // 벽 없음
+    });
+    card.addEventListener('pointerup',async ev=>{
+      if(!d)return;clearTimeout(d.timer);const moved=d.moved,grp=d.grp;d=null;
+      const ks=grp?grp.map(g=>g.k):[card];
+      ks.forEach(k=>k.classList.remove('dragging','grp'));
+      if(!moved){if(!grp)openIns(card.dataset.iid);return}
+      try{await Promise.all(ks.map(k=>withRetry(()=>insCol.doc(k.dataset.iid).update({x:Math.round(k.offsetLeft),y:Math.round(k.offsetTop)}))))}catch(e){handleWriteErr(e)}
+    });
+    card.addEventListener('pointercancel',()=>{if(!d)return;clearTimeout(d.timer);(d.grp?d.grp.map(g=>g.k):[card]).forEach(k=>k.classList.remove('dragging','grp'));d=null});
+  });
+}
+/* ---- 인사이트 자동 배치: 연결 묶음마다 출발점 → 이어진 인사이트를 왼쪽→오른쪽 열로 ---- */
+async function autoLayoutIns(){
+  const L=S.insights; if(!L.length||!insCol) return;
+  const Hs={}; document.querySelectorAll('#iworld .icard').forEach(c=>Hs[c.dataset.iid]=c.offsetHeight);
+  const h=id=>Hs[id]||150, GX=CW+80, GY=28, GAP=70, X0=40;
+  const by=S.insById, nb={}; L.forEach(i=>nb[i.id]=new Set());
+  L.forEach(i=>arr(i.links).forEach(t=>{if(by[t]&&t!==i.id){nb[i.id].add(t);nb[t].add(i.id)}}));
+  const seen=new Set(), comps=[];
+  for(const i of L){ if(seen.has(i.id)) continue; const c=[],st=[i.id]; seen.add(i.id);
+    while(st.length){const x=st.pop();c.push(x);nb[x].forEach(y=>{if(!seen.has(y)){seen.add(y);st.push(y)}})} comps.push(c) }
+  const byTime=(a,b)=>(by[a].createdAt||'').localeCompare(by[b].createdAt||'');
+  const multi=comps.filter(c=>c.length>1).sort((a,b)=>b.length-a.length);
+  const single=comps.filter(c=>c.length===1).map(c=>c[0]).sort((a,b)=>(by[a].type||'').localeCompare(by[b].type||'')||byTime(a,b));
+  const pos={}; let y0=40;
+  for(const c of multi){
+    const set=new Set(c), layer={}; c.forEach(id=>layer[id]=0);
+    // 열 = 출발점에서 몇 단계 떨어졌는지 (순환이 있어도 끝나도록 반복 횟수 제한)
+    for(let k=0;k<c.length;k++) for(const id of c) for(const t of arr(by[id].links)) if(set.has(t)&&layer[t]+1<c.length&&layer[id]<layer[t]+1) layer[id]=layer[t]+1;
+    const cols=[]; c.forEach(id=>(cols[layer[id]]=cols[layer[id]]||[]).push(id));
+    const ord={}; let blockH=0;
+    cols.forEach((col,ci)=>{ if(!col) return;
+      const m=x=>{const ps=arr(by[x].links).filter(t=>ord[t]!=null);return ps.length?ps.reduce((s,t)=>s+ord[t],0)/ps.length:1e6};
+      col.sort((a,b)=>m(a)-m(b)||byTime(a,b));
+      let y=y0; col.forEach((id,k)=>{ord[id]=k;pos[id]={x:X0+ci*GX,y};y+=h(id)+GY}); blockH=Math.max(blockH,y-y0);
+    });
+    y0+=blockH+GAP;
+  }
+  for(let r=0;r*4<single.length;r++){const row=single.slice(r*4,r*4+4);let mh=0;row.forEach((id,k)=>{pos[id]={x:X0+k*GX,y:y0};mh=Math.max(mh,h(id))});y0+=mh+GY}
+  const todo=L.filter(i=>pos[i.id]&&(i.x!==pos[i.id].x||i.y!==pos[i.id].y));
+  S.ipan=null;   // 다시 그릴 때 전체가 보이게
+  try{ await Promise.all(todo.map(i=>withRetry(()=>insCol.doc(i.id).update({x:pos[i.id].x,y:pos[i.id].y})))); render(); toast('카드를 다시 배치했어요') }
+  catch(e){handleWriteErr(e)}
+}
+function bindIns(){
+  const main=$('#main');
+  const ea=$('#iEmptyAdd'); if(ea) ea.onclick=()=>openInsForm(null);
+  const q=$('#iq'); if(q) q.oninput=()=>{S.iq=q.value;clearTimeout(bindIns._t);bindIns._t=setTimeout(()=>{const pos=q.selectionStart;render();const n=$('#iq');if(n){n.focus();n.setSelectionRange(pos,pos)}},180)};
+  const ty=$('#iType'); if(ty) ty.onchange=()=>{S.itype=ty.value;render()};
+  const st=$('#iStatus'); if(st) st.onchange=()=>{S.istatus=st.value;render()};
+  const pp=$('#iPaper'); if(pp) pp.onchange=()=>{S.ipaper=pp.value;render()};
+  main.querySelectorAll('.pchip').forEach(ch=>ch.onclick=ev=>{ev.stopPropagation();goPaper(ch.dataset.pid)});
+  if(S.iview==='canvas'){bindCanvas();return}
+  main.querySelectorAll('[data-iid]').forEach(el=>el.onclick=()=>openIns(el.dataset.iid));
+  if(S.iview==='kanban'){
+    main.querySelectorAll('.icard-k').forEach(k=>{k.ondragstart=ev=>{ev.dataTransfer.setData('text/plain',k.dataset.iid);k.classList.add('drag')};k.ondragend=()=>k.classList.remove('drag')});
+    main.querySelectorAll('[data-icol]').forEach(c=>{
+      c.ondragover=ev=>{ev.preventDefault();c.classList.add('over')};c.ondragleave=()=>c.classList.remove('over');
+      c.ondrop=ev=>{ev.preventDefault();c.classList.remove('over');const id=ev.dataTransfer.getData('text/plain');if(id)setInsStatus(id,c.dataset.icol)};
+    });
+  }
+}
+async function setInsStatus(id,st){
+  const i=S.insById[id];if(!i||(i.status||'thinking')===st)return;
+  try{await withRetry(()=>insCol.doc(id).update({status:st,updatedAt:new Date().toISOString()}));toast(`"${IS[st].label}"(으)로 옮겼어요`)}catch(e){handleWriteErr(e)}
+}
+/* ---- insight detail ---- */
+function openIns(id){S.openIns=id;S.openId=null;renderInsDetail();$('#drawer').classList.add('open','ins');$('#scrim').classList.add('open')}
+function renderInsDetail(){
+  const i=S.insById[S.openIns],d=$('#drawer');if(!i){closeDetail();return}
+  const ps=arr(i.papers).map(id=>S.byId[id]).filter(Boolean);
+  const out=arr(i.links).map(id=>S.insById[id]).filter(Boolean);
+  const inc=S.insights.filter(x=>x.id!==i.id&&arr(x.links).includes(i.id));
+  const fmt=s=>s?s.slice(0,10):'-';
+  d.innerHTML=`<div class="d-head"><button class="btn ghost" id="dClose">✕</button><span class="spacer" style="flex:1"></span><button class="btn" id="iEdit">편집</button><button class="btn danger" id="iDel">삭제</button></div>
+  <div class="d-body">
+    <div class="d-row">${itypeHTML(i.type)}</div>
+    <h2>${esc(insTitle(i))}</h2>
+    <div class="quick"><label>상태 <select id="iqStatus">${ISTATUS.map(s=>`<option value="${s.k}" ${(i.status||'thinking')===s.k?'selected':''}>${s.label}</option>`).join('')}</select></label></div>
+    ${i.body?`<div class="sec"><p>${esc(i.body)}</p></div>`:''}
+    ${ps.length?`<div class="sec"><h4><i style="background:var(--s-read)"></i>관련 논문</h4><div class="links">${ps.map(p=>`<div class="plink" data-pp="${esc(p.id)}"><span class="arrow" style="color:#8ea8ff">◎</span><div style="min-width:0">${esc(p.title)}</div><span class="m">${esc(paperShort(p))}</span></div>`).join('')}</div></div>`:''}
+    ${out.length?`<div class="sec"><h4><i style="background:${INS_ACCENT}"></i>출발점 (이 인사이트가 비롯된 인사이트)</h4><div class="links">
+      ${out.map(x=>`<div class="plink" data-ii="${esc(x.id)}"><span class="arrow">←</span>${itypeHTML(x.type)}<div style="min-width:0">${esc(insTitle(x))}</div></div>`).join('')}
+    </div></div>`:''}
+    ${inc.length?`<div class="sec"><h4><i style="background:${INS_ACCENT}"></i>여기서 이어진 인사이트</h4><div class="links">
+      ${inc.map(x=>`<div class="plink" data-ii="${esc(x.id)}"><span class="arrow">→</span>${itypeHTML(x.type)}<div style="min-width:0">${esc(insTitle(x))}</div></div>`).join('')}
+    </div></div>`:''}
+    <div class="dates"><span>만든 날: ${esc(fmt(i.createdAt))}</span><span>수정: ${esc(fmt(i.updatedAt))}</span></div>
+  </div>`;
+  $('#dClose').onclick=closeDetail;
+  $('#iEdit').onclick=()=>openInsForm(i.id);
+  $('#iDel').onclick=()=>confirmBox(`"${insTitle(i)}" 인사이트를 삭제할까요?`,'삭제하면 되돌릴 수 없어요. 다른 인사이트와의 연결도 함께 끊겨요.','삭제',()=>deleteIns(i.id));
+  $('#iqStatus').onchange=e=>setInsStatus(i.id,e.target.value);
+  d.querySelectorAll('[data-pp]').forEach(el=>el.onclick=()=>goPaper(el.dataset.pp));
+  d.querySelectorAll('[data-ii]').forEach(el=>el.onclick=()=>{S.openIns=el.dataset.ii;renderInsDetail();d.querySelector('.d-body').scrollTop=0});
+}
+async function deleteIns(id){
+  try{
+    await withRetry(()=>insCol.doc(id).delete());
+    for(const x of S.insights) if(x.id!==id&&arr(x.links).includes(id)) await withRetry(()=>insCol.doc(x.id).update({links:arr(x.links).filter(l=>l!==id)}));
+    closeDetail();toast('삭제했어요');
+  }catch(e){handleWriteErr(e)}
+}
+/* ---- insight form ---- */
+function pickList(boxId,qId,items,sel,label,emptyMsg){
+  const box=$('#'+boxId),q=$('#'+qId);
+  const draw=()=>{
+    const s=q.value.trim().toLowerCase();
+    const L0=items.filter(x=>!s||x.text.toLowerCase().includes(s)).sort((a,b)=>(sel.has(b.id)-sel.has(a.id))||a.text.localeCompare(b.text));
+    const L=L0.slice(0,Math.max(80,sel.size));
+    box.innerHTML=L.length?(L0.length>L.length?`<div class="rel-none">${L0.length-L.length}편은 숨겼어요. 검색어로 좁혀 보세요.</div>`:'')+L.map(x=>`<div class="rel-item" data-k="${esc(x.id)}"><span class="ck ${sel.has(x.id)?'on':''}"></span>${x.pre||''}<span>${esc(x.text)}</span><span style="margin-left:auto;color:var(--faint);font-size:11.5px;white-space:nowrap">${esc(x.sub||'')}</span></div>`).join(''):`<div class="rel-none">${items.length?'검색 결과가 없어요':emptyMsg}</div>`;
+    box.querySelectorAll('[data-k]').forEach(el=>el.onclick=()=>{const k=el.dataset.k;sel.has(k)?sel.delete(k):sel.add(k);draw()});
+  };
+  q.oninput=draw;draw();
+}
+function openInsForm(id,preset,init,noDraft){
+  const i=id?S.insById[id]:{type:'idea',status:'thinking',papers:preset?[preset]:[],...(init||{})};
+  const pSel=new Set(arr(i.papers)), lSel=new Set(arr(i.links));
+  $('#mbox').className='mbox ins';
+  $('#mbox').innerHTML=`<div class="mh"><h3>${id?'인사이트 편집':'새 인사이트'}</h3><button class="btn ghost" data-x>✕</button></div>
+  <form class="mb" id="iform"><div class="fg">
+    <div class="fld full"><label>종류</label><div class="seg" id="fType">${ITYPES.map(t=>`<button type="button" data-t="${t.k}" class="${(i.type||'idea')===t.k?'on':''}" style="--tc:${t.color}">${t.label}</button>`).join('')}</div></div>
+    <div class="fld full"><label for="fi_title">제목 <em>비우면 내용 첫 줄을 써요</em></label><input id="fi_title" value="${esc(i.title||'')}" placeholder="한 줄로 요약"></div>
+    <div class="fld full"><label for="fi_body">내용</label><textarea id="fi_body" rows="7" placeholder="떠오른 생각을 자유롭게">${esc(i.body||'')}</textarea></div>
+    <div class="fld"><label for="fi_status">상태</label><select id="fi_status">${ISTATUS.map(s=>`<option value="${s.k}" ${(i.status||'thinking')===s.k?'selected':''}>${s.label}</option>`).join('')}</select></div>
+    <div class="fsec">관련 논문</div>
+    <div class="fld full"><input id="fiPq" placeholder="논문 검색"><div class="rel-list" id="fiP" style="margin-top:6px"></div></div>
+    <div class="fsec">출발점 인사이트 <span style="color:var(--faint);font-weight:400">(고른 인사이트 → 이 인사이트, 이 생각이 어디서 비롯됐는지)</span></div>
+    <div class="fld full"><input id="fiLq" placeholder="인사이트 검색"><div class="rel-list" id="fiL" style="margin-top:6px"></div></div>
+  </div></form>
+  <div class="mf"><button class="btn ghost" data-x>취소</button><button class="btn primary" id="fiSave">${id?'저장':'추가'}</button></div>`;
+  openModal();
+  let type=i.type||'idea';
+  $('#fType').querySelectorAll('button').forEach(b=>b.onclick=()=>{type=b.dataset.t;$('#fType').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
+  pickList('fiP','fiPq',S.papers.map(p=>({id:p.id,text:p.title||'(제목 없음)',sub:paperShort(p)})),pSel,'','위키에 논문이 아직 없어요');
+  pickList('fiL','fiLq',S.insights.filter(x=>x.id!==id).map(x=>({id:x.id,text:insTitle(x),pre:itypeHTML(x.type)})),lSel,'','다른 인사이트가 아직 없어요');
+  const FKEY='ins:'+(id||('new'+(preset?':'+preset:'')));
+  armForm('#iform',FKEY,{get:()=>({p:[...pSel],l:[...lSel],t:type}),set:o=>{
+    pSel.clear();arr(o.p).forEach(x=>pSel.add(x));lSel.clear();arr(o.l).forEach(x=>lSel.add(x));
+    if(IT[o.t]){type=o.t;$('#fType').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===type))}
+    pickList('fiP','fiPq',S.papers.map(p=>({id:p.id,text:p.title||'(제목 없음)',sub:paperShort(p)})),pSel,'','위키에 논문이 아직 없어요');
+    pickList('fiL','fiLq',S.insights.filter(x=>x.id!==id).map(x=>({id:x.id,text:insTitle(x),pre:itypeHTML(x.type)})),lSel,'','다른 인사이트가 아직 없어요');
+  }},()=>openInsForm(id,preset,init,true),noDraft||!!init);
+  $('#iform').onsubmit=e=>e.preventDefault();
+  if(!id) setTimeout(()=>$('#fi_body').focus(),50);
+  $('#fiSave').onclick=async()=>{
+    const title=$('#fi_title').value.trim(), body=$('#fi_body').value.trim();
+    if(!title&&!body){$('#fi_body').focus();toast('제목이나 내용을 적어 주세요');return}
+    const now=new Date().toISOString();
+    const data={title,body,type,status:$('#fi_status').value,papers:[...pSel],links:[...lSel],createdAt:i.createdAt||now,updatedAt:now};
+    if(id&&Number.isFinite(i.x)){data.x=i.x;data.y=i.y}
+    else{const c=$('#icanvas');if(c&&S.ipan){data.x=Math.round(-S.ipan.x+c.clientWidth/2-CW/2+(Math.random()*60-30));data.y=Math.round(-S.ipan.y+c.clientHeight/2-60+(Math.random()*60-30))}}
+    if(!insCol){toast('저장소에 연결되지 않았어요');return}
+    $('#fiSave').disabled=true;
+    const ref=id?insCol.doc(id):insCol.doc();
+    try{await withRetry(()=>ref.set(sanitizeIns(data)));draftDel(FKEY);closeModal(true);toast(id?'저장했어요':'추가했어요');if(S.space==='ins'||id)openIns(ref.id)}
+    catch(e){handleWriteErr(e)}finally{const b=$('#fiSave');if(b)b.disabled=false}
+  };
+}
+function sanitizeIns(p){
+  const o={title:String(p.title??''),body:String(p.body??''),type:IT[p.type]?p.type:'idea',status:IS[p.status]?p.status:'thinking',
+    papers:arr(p.papers).map(String),links:arr(p.links).map(String),createdAt:String(p.createdAt||new Date().toISOString()),updatedAt:String(p.updatedAt||p.createdAt||new Date().toISOString())};
+  if(Number.isFinite(+p.x)&&p.x!==null&&p.x!==''&&Number.isFinite(+p.y)&&p.y!==null&&p.y!==''){o.x=+p.x;o.y=+p.y}
+  return o;
+}
+/* ---- paper-side pieces ---- */
+function insSectionForPaper(p){
+  const L=insOfPaper(p.id);
+  return `<div class="sec"><h4><i style="background:${INS_ACCENT}"></i>이 논문에서 나온 인사이트 <button class="btn ghost" id="pAddIns" style="margin-left:auto;padding:2px 8px;font-size:11.5px;color:${INS_ACCENT}">+ 인사이트</button></h4>
+    ${L.length?`<div class="links">${L.map(x=>`<div class="plink" data-gi="${esc(x.id)}"><span class="arrow" style="color:${INS_ACCENT}">◆</span>${itypeHTML(x.type)}<div style="min-width:0">${esc(insTitle(x))}</div><span class="m">${esc((IS[x.status]||IS.thinking).label)}</span></div>`).join('')}</div>`:`<p style="color:var(--faint);font-size:13px">아직 없어요.</p>`}</div>`;
+}
+function renderRecentIns(){
+  const L=[...S.insights].sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||'')).slice(0,4);
+  return `<div class="panel ins-panel"><div style="display:flex;justify-content:space-between;align-items:center"><h2>최근 인사이트</h2><button class="btn ghost" id="hGoIns" style="padding:4px 8px;font-size:12px;color:${INS_ACCENT}">보드 열기 →</button></div>
+    ${L.length?`<div class="links" style="margin-top:10px">${L.map(x=>`<div class="plink" data-gi="${esc(x.id)}">${itypeHTML(x.type)}<div style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(insTitle(x))}</div><span class="m">${esc((IS[x.status]||IS.thinking).label)}</span></div>`).join('')}</div>`
+      :`<p class="sub" style="margin:8px 0 0">논문을 읽으며 떠오른 생각을 인사이트 보드에 적어 보세요.</p>`}</div>`;
+}
+
+/* ================= 질문: 위키 안에서만 답하기 ================= */
+Object.assign(S,{qa:[],askQ:'',askThread:[],askBusy:false,askText:'',askErr:'',askPending:'',askCtx:null,askUseIns:false,qaShow:12,sampleChecked:false});
+let askCtl=null;
+const CTX_CHARS=90000;
+// 영어는 단어, 한국어는 두 글자씩 잘라서 비교 (조사·어미가 붙어도 걸리게)
+function qTok(s){
+  const out=[];
+  for(const w of String(s||'').toLowerCase().match(/[a-z0-9][a-z0-9.\-]*|[가-힣]+/g)||[]){
+    if(/[가-힣]/.test(w)){if(w.length<2)out.push(w);else for(let i=0;i<w.length-1;i++)out.push(w.slice(i,i+2))}
+    else{const t=w.replace(/[.\-]+$/,'');if(t.length>1)out.push(t)}
+  }
+  return out;
+}
+function paperDoc(p){
+  const rel=arr(p.related).map(r=>S.byId[r]).filter(Boolean).map(r=>{const w=(p.relatedWhy||{})[r.id]||((r.relatedWhy||{})[p.id])||'';return `#${noStr(r)}${w?` (${w})`:''}`});
+  const acc=ACCESS[p.access];
+  return [`[#${noStr(p)||'?'}] ${p.title||'(제목 없음)'}`,
+    `저자: ${arr(p.authors).join('; ')||'-'} · 게재: ${[p.journal,p.pubDate].filter(Boolean).join(', ')||'-'} · 유형: ${PT[ptypeOf(p)].label} · 읽은 상태: ${(ST[p.status]||ST.plan).label}${acc?` · ${acc.l}`:''}`,
+    (arr(p.fields).length||arr(p.keywords).length)?`분야: ${arr(p.fields).join(', ')} · 키워드: ${arr(p.keywords).join(', ')}`:'',
+    p.problem&&`문제: ${p.problem}`,p.method&&`방법: ${p.method}`,p.result&&`결과: ${p.result}`,p.limitations&&`한계점: ${p.limitations}`,
+    p.interesting&&`(내 생각) 흥미로운 점: ${p.interesting}`,p.questions&&`(내 생각) 궁금한 점: ${p.questions}`,p.memo&&`메모: ${p.memo}`,
+    rel.length?`위키 안의 관련 논문: ${rel.join('; ')}`:''].filter(Boolean).join('\n');
+}
+// 위키가 작으면 전부, 크면 BM25 점수가 높은 논문부터 글자 수 한도까지
+function pickContext(question){
+  const docs=S.papers.map(p=>({p,text:paperDoc(p),score:0}));
+  const total=docs.reduce((s,d)=>s+d.text.length,0);
+  const qt=[...new Set(qTok(question))];
+  const toks=docs.map(d=>qTok(d.text+'\n'+(d.p.title||'')+'\n'+arr(d.p.keywords).join(' ')));
+  const N=docs.length, avg=toks.reduce((s,t)=>s+t.length,0)/Math.max(1,N), df={};
+  toks.forEach(t=>{for(const w of new Set(t))df[w]=(df[w]||0)+1});
+  docs.forEach((d,i)=>{
+    const tf={};for(const w of toks[i])tf[w]=(tf[w]||0)+1;
+    let s=0;for(const w of qt){const f=tf[w];if(!f)continue;s+=Math.log(1+(N-df[w]+.5)/(df[w]+.5))*f*2.2/(f+1.2*(.25+.75*toks[i].length/avg))}
+    if(+d.p.no&&new RegExp('#0*'+(+d.p.no)+'(?!\\d)').test(question)) s+=1000;
+    d.score=s;
+  });
+  docs.sort((a,b)=>b.score-a.score||(+b.p.no||0)-(+a.p.no||0));
+  if(total<=CTX_CHARS) return {docs,all:true};
+  const out=[];let used=0;
+  for(const d of docs){
+    if(out.length>=8&&(d.score<=0||used+d.text.length>CTX_CHARS))break;
+    if(used+d.text.length>CTX_CHARS*1.1)continue;
+    out.push(d);used+=d.text.length;
+  }
+  return {docs:out,all:false};
+}
+function insDoc(){
+  return S.insights.map(i=>`[인사이트] ${insTitle(i)} (${(IT[i.type]||IT.idea).label}, ${(IS[i.status]||IS.thinking).label})${i.body?`\n${i.body}`:''}${arr(i.papers).length?`\n관련 논문: ${arr(i.papers).map(id=>S.byId[id]).filter(Boolean).map(p=>'#'+noStr(p)).join(', ')}`:''}`).join('\n\n').slice(0,20000);
+}
+function askRules(ctx,useIns){
+  return `당신은 한 연구자의 개인 논문 위키 안에서만 답하는 조수입니다. 아래 <wiki> 안의 논문 정리 ${ctx.docs.length}편${ctx.all?'(위키 전체)':`(전체 ${S.papers.length}편 중 질문과 관련이 높은 순)`}${useIns?'과 <insights> 안의 연구자 본인 인사이트':''}만 근거로, 한국어로 답하세요.
+
+규칙
+1. 위키에 없는 사실·수치·논문을 지어내지 마세요. 일반 지식으로 빈칸을 메우지 마세요.
+2. 근거가 된 논문을 문장 끝에 [#05]처럼 대괄호와 번호로 표시하세요. 여러 편이면 [#05][#12]. 위키에 없는 번호는 쓰지 마세요.
+3. 위키만으로 답할 수 없으면 "위키에 이 주제를 다룬 논문이 없어요"라고 분명히 말하고, 어떤 논문을 추가하면 좋을지 한 줄로 제안하세요. 일부만 답할 수 있으면 답할 수 있는 부분과 없는 부분을 나눠 말하세요.
+4. 정리는 원문이 아니라 요약입니다. 요약에 없는 세부(실험 조건 등)는 "위키 정리에는 없음"이라고 하고 원문 PDF를 확인하라고 하세요.
+5. 논문에 적힌 내용과 당신의 추론·종합을 구분하고, 추론에는 "(추론)"을 붙이세요.
+6. "(내 생각)" 칸과 인사이트는 연구자 본인의 생각입니다. 논문의 주장처럼 인용하지 마세요.
+7. 형식: 첫 문단에 핵심 답을 한두 문장으로. 그다음 필요하면 "- " 목록이나 "### 소제목"으로 정리하세요. 표와 코드 블록은 쓰지 마세요. 보통 300~700자.
+
+<wiki>
+${ctx.docs.map(d=>d.text).join('\n\n---\n\n')}
+</wiki>${useIns&&S.insights.length?`\n\n<insights>\n${insDoc()}\n</insights>`:''}`;
+}
+const paperByNo=n=>S.papers.find(x=>+x.no===+n);
+function citedIds(text){
+  const ids=[];
+  for(const m of String(text||'').matchAll(/\[(#[^\]]{1,60})\]/g)) for(const n of m[1].matchAll(/#0*(\d+)/g)){const p=paperByNo(n[1]);if(p&&!ids.includes(p.id))ids.push(p.id)}
+  return ids;
+}
+function mdLite(t){
+  const lines=esc(t).split('\n');let h='',ul=false,para=[];
+  const flush=()=>{if(para.length){h+=`<p>${para.join('<br>')}</p>`;para=[]}};
+  const closeUl=()=>{if(ul){h+='</ul>';ul=false}};
+  for(const raw of lines){
+    const l=raw.trim();let m;
+    if(!l){flush();closeUl();continue}
+    if((m=l.match(/^#{1,6}\s+(.*)/))){flush();closeUl();h+=`<h5>${m[1]}</h5>`;continue}
+    if((m=l.match(/^(?:[-*•]|\d+[.)])\s+(.*)/))){flush();if(!ul){h+='<ul>';ul=true}h+=`<li>${m[1]}</li>`;continue}
+    closeUl();para.push(l);
+  }
+  flush();closeUl();
+  return h.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\[(#[^\]]{1,60})\]/g,(all,inner)=>{
+    const parts=[...inner.matchAll(/#0*(\d+)/g)].map(n=>{const p=paperByNo(n[1]);return p?`<span class="cite" data-cite="${esc(p.id)}" title="${esc(p.title)}">#${noStr(p)}</span>`:`#${n[1]}`});
+    return parts.length?parts.join(''):all;
+  });
+}
+const fmtDT=s=>{try{return new Date(s).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch(e){return ''}};
+function answerHTML(e,last){
+  const ids=citedIds(e.a);
+  return `<div class="answer ${e.live?'live':''}"><div class="q">Q. ${esc(e.q)}</div>
+    <div class="body">${e.a?mdLite(e.a):(e.live&&!S.askErr?'<p class="thinking">위키를 읽고 생각하는 중…</p>':'')}</div>
+    ${e.live&&S.askErr?`<div class="notice" style="margin:10px 0 0">${esc(S.askErr)}</div>`:''}
+    ${ids.length&&!e.live?`<div class="srcs"><div class="sec" style="margin:0"><h4><i style="background:var(--accent)"></i>근거로 쓴 논문 ${ids.length}편</h4><div class="links">${ids.map(id=>{const p=S.byId[id];return `<div class="plink" data-cite="${esc(id)}"><span class="no">#${noStr(p)}</span><div style="min-width:0">${esc(p.title)}</div><span class="m">${esc([shortAuthors(p),yearOf(p)].filter(Boolean).join(' · '))}</span></div>`}).join('')}</div></div></div>`:''}
+    ${!e.live?`<div class="meta">${e.all?`위키 전체 ${e.ctxN}편을 읽고 답함`:`관련 높은 ${e.ctxN}편을 골라 읽고 답함`}${e.at?` · ${esc(fmtDT(e.at))}`:''}</div>
+      ${last?`<div class="askrow"><button class="btn" data-acopy>답 복사</button><button class="btn" data-ains>인사이트로 저장</button></div>`:''}`:''}
+  </div>`;
+}
+function qaThreads(){
+  const m={};for(const x of S.qa){const t=x.thread||x.id;(m[t]=m[t]||[]).push(x)}
+  return Object.entries(m).map(([t,L])=>({t,L:L.sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''))}))
+    .sort((a,b)=>(b.L[b.L.length-1].createdAt||'').localeCompare(a.L[a.L.length-1].createdAt||''));
+}
+function histHTML(){
+  const T=qaThreads(); if(!T.length) return '';
+  return `<div class="hist"><h3>지난 질문 ${T.length}개</h3><div class="links">${T.slice(0,S.qaShow).map(({t,L})=>`<div class="plink" data-qat="${esc(t)}"><span class="arrow">Q</span><div style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(L[0].q)}${L.length>1?` <span style="color:var(--faint)">· 이어진 질문 ${L.length-1}개</span>`:''}</div><span class="m">${esc(fmtDT(L[L.length-1].createdAt))}</span><button class="btn ghost" data-qadel="${esc(t)}" title="이 대화 지우기" aria-label="이 대화 지우기" style="padding:0 7px">✕</button></div>`).join('')}</div>${T.length>S.qaShow?`<div class="more"><button class="btn ghost" id="qaMore">더 보기</button></div>`:''}</div>`;
+}
+function renderAsk(){
+  let h=`<div class="ask"><div class="hero"><div><h1>위키에 질문하기</h1><p>정리해 둔 논문 안에서만 답해요. 위키에 없으면 없다고 말하고, 근거 논문 번호를 달아요.</p></div><div class="meta">논문 <b>${S.papers.length}</b>편 기준</div></div>`;
+  if(!S.papers.length) return h+`<div class="panel empty"><h3>아직 논문이 없어요</h3><div>논문을 먼저 추가해 주세요.</div></div></div>`;
+  if(!sample&&S.sampleChecked) h+=`<div class="notice">질문 탭을 쓰려면 이 PC에 Claude Code 명령(claude)이 설치돼 있어야 해요. 대신 이 폴더에서 Claude Code를 열고 "위키에 질문: …"이라고 물어봐도 같은 규칙으로 답해요.</div>`;
+  const th=S.askThread;
+  h+=`<div class="askbox"><textarea id="askQ" placeholder="${th.length?'이어서 질문하기 (앞의 대화를 기억해요)':'예: 그래프 신경망으로 소재를 찾은 논문들을 비교해줘 / #12와 #13은 어떻게 달라?'}">${esc(S.askQ)}</textarea>
+    <div class="askrow"><label class="gtoggle"><input type="checkbox" id="askIns" ${S.askUseIns?'checked':''}> 내 인사이트도 참고</label><span class="hint">Ctrl+Enter로 보내기 · 질문할 때마다 내 Claude Code 사용량이 쓰여요 · 답이 다 만들어지면 한 번에 보여요</span>
+    ${th.length&&!S.askBusy?`<button class="btn ghost" id="askNew">새 질문</button>`:''}
+    ${S.askBusy?`<button class="btn" id="askStop">멈추기</button>`:`<button class="btn primary" id="askGo" ${sample?'':'disabled'}>${th.length?'이어서 질문':'질문하기'}</button>`}</div></div>`;
+  th.forEach((e,i)=>h+=answerHTML(e,i===th.length-1&&!S.askBusy&&!S.askErr));
+  if(S.askBusy||S.askErr) h+=answerHTML({q:S.askPending,a:S.askText,live:true},false);
+  return h+histHTML()+`</div>`;
+}
+function updateLive(){const b=document.querySelector('.answer.live .body');if(b)b.innerHTML=mdLite(S.askText)}
+const ASK_ERR={not_granted:'Claude 사용을 허용하지 않아서 답할 수 없어요.',sampling_disabled:'이 계정에서는 Claude를 쓸 수 없어요.',rate_limited:'요청이 많거나 사용량 한도에 닿았어요. 잠시 후 다시 질문해 주세요.',session_expired:'다시 로그인해 주세요.',prompt_too_large:'넘길 내용이 너무 길어요. 질문을 좁혀 주세요.',refused:'이 질문에는 답할 수 없어요. 질문을 바꿔 주세요.',empty_completion:'답이 비어 있어요. 질문을 조금 바꿔 다시 해 주세요.'};
+async function doAsk(){
+  const ta=$('#askQ'), q=(ta?ta.value:S.askQ).trim();
+  if(!q){toast('질문을 적어 주세요');ta&&ta.focus();return}
+  if(!sample){toast('이 화면에서는 질문 기능을 쓸 수 없어요');return}
+  if(S.askBusy) return;
+  const thread=S.askThread;
+  const ctx=pickContext([...thread.map(t=>t.q),q].join('\n'));
+  const turns=[{role:'user',content:askRules(ctx,S.askUseIns)}];
+  for(const t of thread.slice(-4)){turns.push({role:'user',content:'질문: '+t.q});turns.push({role:'assistant',content:t.a})}
+  turns.push({role:'user',content:'질문: '+q});
+  Object.assign(S,{askBusy:true,askErr:'',askText:'',askPending:q,askCtx:ctx,askQ:''});
+  askCtl=new AbortController();
+  render();
+  try{
+    const {text,truncated}=await sample(turns,{signal:askCtl.signal,cache:false,onText:({text})=>{S.askText=text;updateLive()}});
+    const e={q,a:text+(truncated?'\n\n(답이 길어 중간에 끊겼어요. 질문을 좁혀 보세요.)':''),ctxN:ctx.docs.length,all:ctx.all,at:new Date().toISOString(),thread:(thread[0]&&thread[0].thread)||('t'+Date.now().toString(36))};
+    e.papers=citedIds(e.a);
+    S.askThread=[...thread,e];S.askText='';
+    if(qaCol){try{await withRetry(()=>qaCol.doc().set({q:e.q.slice(0,4000),a:e.a.slice(0,60000),papers:e.papers,ctxN:e.ctxN,all:!!e.all,thread:e.thread,createdAt:e.at}))}catch(err){toast('답은 받았지만 기록을 저장하지 못했어요')}}
+  }catch(err){
+    const c=err&&err.code;
+    S.askQ=q;S.askText=c==='cancelled'?'':(err&&err.text)||'';
+    S.askErr=c==='cancelled'?'':(ASK_ERR[c]||(err&&err.message)||'답을 받지 못했어요. 잠시 후 다시 시도해 주세요.');
+    if(['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].includes(c)) sample=null;
+  }finally{
+    S.askBusy=false;askCtl=null;
+    if(S.space==='papers'&&S.view==='ask'){render();const t=$('#askQ');if(t&&S.askQ)t.focus()}
+  }
+}
+function bindAsk(){
+  const main=$('#main'), ta=$('#askQ');
+  if(ta){ta.oninput=()=>{S.askQ=ta.value};ta.onkeydown=e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)&&!e.isComposing){e.preventDefault();doAsk()}}}
+  const go=$('#askGo'); if(go) go.onclick=doAsk;
+  const st=$('#askStop'); if(st) st.onclick=()=>askCtl&&askCtl.abort();
+  const nw=$('#askNew'); if(nw) nw.onclick=()=>{S.askThread=[];S.askErr='';S.askQ='';render();const t=$('#askQ');if(t)t.focus()};
+  const ai=$('#askIns'); if(ai) ai.onchange=()=>{S.askUseIns=ai.checked};
+  main.querySelectorAll('[data-cite]').forEach(el=>el.onclick=()=>openDetail(el.dataset.cite));
+  const last=S.askThread[S.askThread.length-1];
+  const ac=main.querySelector('[data-acopy]'); if(ac&&last) ac.onclick=()=>copyText(last.a);
+  const an=main.querySelector('[data-ains]'); if(an&&last) an.onclick=()=>openInsForm(null,null,{type:'question',title:last.q.slice(0,80),body:last.a,papers:citedIds(last.a)});
+  main.querySelectorAll('[data-qat]').forEach(el=>el.onclick=ev=>{
+    if(ev.target.closest('[data-qadel]')) return;
+    const T=qaThreads().find(x=>x.t===el.dataset.qat); if(!T) return;
+    S.askThread=T.L.map(x=>({q:x.q,a:x.a,papers:x.papers,ctxN:x.ctxN,all:x.all,at:x.createdAt,thread:x.thread||x.id}));
+    S.askErr='';render();window.scrollTo({top:0,behavior:'smooth'});
+  });
+  main.querySelectorAll('[data-qadel]').forEach(b=>b.onclick=ev=>{
+    ev.stopPropagation();
+    const T=qaThreads().find(x=>x.t===b.dataset.qadel); if(!T) return;
+    confirmBox('이 질문 기록을 지울까요?',`"${T.L[0].q.slice(0,40)}"${T.L.length>1?` 외 ${T.L.length-1}개`:''}. 지우면 되돌릴 수 없어요.`,'지우기',async()=>{
+      try{for(const x of T.L) await withRetry(()=>qaCol.doc(x.id).delete());if(S.askThread[0]&&S.askThread[0].thread===T.t)S.askThread=[];toast('지웠어요')}catch(e){handleWriteErr(e)}
+    });
+  });
+  const qm=$('#qaMore'); if(qm) qm.onclick=()=>{S.qaShow+=12;render()};
+}
+
+/* ================= boot ================= */
+S.cfg={};
+fetch('/config.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).then(c=>{S.cfg=c||{};if(S.cfg.title)document.title=S.cfg.title;const bt=document.querySelector('.brand .bt');if(bt&&S.cfg.title)bt.textContent=S.cfg.title;render()}).catch(()=>{});
+setView(location.hash.slice(1)||'home');
+(async()=>{
+  // 질문 기능은 저장소와 따로, 기다리지 않고 준비
+  try{window.claude.use('sample').then(s=>{sample=s;S.sampleChecked=true;if(S.view==='ask'&&S.space==='papers')render()},()=>{S.sampleChecked=true})}catch(e){S.sampleChecked=true}
+  try{ db = window.claude && await window.claude.use('db'); }catch(e){ db=null }
+  try{ downloads = window.claude && await window.claude.use('downloads'); }catch(e){ downloads=null }
+  if(!db){S.dbErr='로컬 서버에 연결할 수 없어요. 터미널에서 python serve.py 를 실행한 뒤 열린 주소로 접속해 주세요.';render();return}
+  papersCol=db.collection('papers');
+  insCol=db.collection('insights');
+  qaCol=db.collection('qa');
+  layoutRef=db.doc('layout/graph');
+  qaCol.onSnapshot(snap=>{
+    S.qa=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(S.space==='papers'&&S.view==='ask'&&!S.askBusy){const t=$('#askQ'),f=t&&document.activeElement===t;if(!f)render()}
+  },()=>{});
+  const lt=setTimeout(()=>{if(!S.layoutLoaded){S.layoutLoaded=true;if(S.space==='papers'&&S.view==='home')drawGraph()}},8000);
+  layoutRef.onSnapshot(snap=>{
+    const pos=snap.exists?(snap.data().pos||{}):{};
+    const first=!S.layoutLoaded;
+    S.gpos={...S.gpos,...pos};
+    if(snap.exists&&first) S._savedLayout=JSON.stringify(pos);
+    S.layoutLoaded=true;clearTimeout(lt);
+    if(first&&S.space==='papers'&&S.view==='home') drawGraph();
+  },()=>{S.layoutLoaded=true;clearTimeout(lt)});
+  insCol.onSnapshot(snap=>{
+    S.insights=snap.docs.map(d=>({id:d.id,...d.data()}));
+    S.insById=Object.fromEntries(S.insights.map(i=>[i.id,i]));
+    S.insLoaded=true;
+    if(!document.querySelector('.icard.dragging')) render();
+    if(S.openIns) renderInsDetail(); else if(S.openId) renderDetail();
+  },()=>{});
+  const timer=setTimeout(()=>{S.slow=true;S.stale=S.loaded;render()},10000);
+  papersCol.onSnapshot(snap=>{
+    S.papers=snap.docs.map(d=>({id:d.id,...d.data()}));
+    S.byId=Object.fromEntries(S.papers.map(p=>[p.id,p]));
+    S._fo=null;S._rel=null;
+    for(const id of [...S.sel]) if(!S.byId[id]) S.sel.delete(id);
+    S.loaded=true;
+    if(!snap.metadata.fromCache){clearTimeout(timer);S.slow=false;S.stale=false}
+    render();
+    if(S.openIns) renderInsDetail(); else if(S.openId) renderDetail();
+  },err=>{
+    clearTimeout(timer);
+    S.dbErr=(err&&err.code==='revoked')?'이 페이지의 데이터 접근이 끊겼어요.':'로컬 서버와 연결이 끊겼어요. serve.py 가 실행 중인지 확인해 주세요.';
+    render();
+  });
+})();
+</script>
+</body>
+</html>
